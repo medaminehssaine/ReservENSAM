@@ -37,5 +37,6 @@ input {
 
 input:focus{
   border-width: 2px;
+  margin-bottom: 5px;
   border-color: var(--bg-primary);
 }
