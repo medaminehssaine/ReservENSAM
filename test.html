@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Reservation System</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        nav {
+            background-color: var(--bg-secondary);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--text-secondary);
+            color: var(--text-primary);
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .reservation-list {
+            background-color: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .reservation-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .status-pending {
+            background-color: #ca8a04;
+        }
+
+        .status-approved {
+            background-color: #16a34a;
+        }
+
+        .status-rejected {
+            background-color: var(--danger);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>Room Reservation System</h1>
+        <button onclick="logout()" id="logoutBtn" class="hidden">Logout</button>
+    </nav>
+
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginForm" class="login-container">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password">
+            </div>
+            <button onclick="login()">Login</button>
+        </div>
+
+        <!-- Club Dashboard -->
+        <div id="clubDashboard" class="hidden">
+            <h2>Make a Reservation</h2>
+            <div class="form-group">
+                <label>Room</label>
+                <select id="room">
+                    <option value="room1">Room 1</option>
+                    <option value="room2">Room 2</option>
+                    <option value="room3">Room 3</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="date">
+            </div>
+            <div class="form-group">
+                <label>Time</label>
+                <input type="time" id="time">
+            </div>
+            <div class="form-group">
+                <label>Purpose</label>
+                <textarea id="purpose"></textarea>
+            </div>
+            <button onclick="submitReservation()">Submit Request</button>
+
+            <div class="reservation-list">
+                <h3>Your Reservations</h3>
+                <div id="clubReservations"></div>
+            </div>
+        </div>
+
+        <!-- ADEAM Dashboard -->
+        <div id="adeamDashboard" class="hidden">
+            <h2>Pending Approvals</h2>
+            <div class="reservation-list" id="adeamReservations"></div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="hidden">
+            <h2>Final Approvals</h2>
+            <div class="reservation-list" id="adminReservations"></div>
+        </div>
+    </div>
+
+    <script>
+        // Test accounts
+        const users = {
+            'club1': { password: 'club123', role: 'club' },
+            'adeam': { password: 'adeam123', role: 'adeam' },
+            'admin': { password: 'admin123', role: 'admin' }
+        };
+
+        // Store reservations
+        let reservations = [];
+        let currentUser = null;
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (users[username] && users[username].password === password) {
+                currentUser = { username, role: users[username].role };
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+
+                // Show appropriate dashboard
+                switch(users[username].role) {
+                    case 'club':
+                        document.getElementById('clubDashboard').classList.remove('hidden');
+                        break;
+                    case 'adeam':
+                        document.getElementById('adeamDashboard').classList.remove('hidden');
+                        break;
+                    case 'admin':
+                        document.getElementById('adminDashboard').classList.remove('hidden');
+                        break;
+                }
+                updateDashboard();
+            } else {
+                alert('Invalid credentials');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('clubDashboard').classList.add('hidden');
+            document.getElementById('adeamDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function submitReservation() {
+            const room = document.getElementById('room').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const purpose = document.getElementById('purpose').value;
+
+            if (!room || !date || !time || !purpose) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const reservation = {
+                id: Date.now(),
+                room,
+                date,
+                time,
+                purpose,
+                club: currentUser.username,
+                status: 'pending_adeam',
+                created_at: new Date().toISOString()
+            };
+
+            reservations.push(reservation);
+            updateDashboard();
+            clearForm();
+        }
+
+        function clearForm() {
+            document.getElementById('room').value = 'room1';
+            document.getElementById('date').value = '';
+            document.getElementById('time').value = '';
+            document.getElementById('purpose').value = '';
+        }
+
+        function updateStatus(id, status) {
+            const reservation = reservations.find(r => r.id === id);
+            if (reservation) {
+                reservation.status = status;
+                updateDashboard();
+            }
+        }
+
+        function updateDashboard() {
+            if (!currentUser) return;
+
+            switch(currentUser.role) {
+                case 'club':
+                    const clubReservations = reservations.filter(r => r.club === currentUser.username);
+                    document.getElementById('clubReservations').innerHTML = clubReservations.map(renderReservation).join('');
+                    break;
+                case 'adeam':
+                    const adeamReservations = reservations.filter(r => r.status === 'pending_adeam');
+                    document.getElementById('adeamReservations').innerHTML = adeamReservations.map(r => renderReservation(r, true)).join('');
+                    break;
+                case 'admin':
+                    const adminReservations = reservations.filter(r => r.status === 'pending_admin');
+                    document.getElementById('adminReservations').innerHTML = adminReservations.map(r => renderReservation(r, true)).join('');
+                    break;
+            }
+        }
+
+        function renderReservation(reservation, showActions = false) {
+            const statusClasses = {
+                'pending_adeam': 'status-pending',
+                'pending_admin': 'status-pending',
+                'approved': 'status-approved',
+                'rejected': 'status-rejected'
+            };
+
+            const statusText = {
+                'pending_adeam': 'Pending ADEAM Approval',
+                'pending_admin': 'Pending Admin Approval',
+                'approved': 'Approved',
+                'rejected': 'Rejected'
+            };
+
+            let actions = '';
+            if (showActions) {
+                if (currentUser.role === 'adeam' && reservation.status === 'pending_adeam') {
+                    actions = `
+                        <div>
+                            <button onclick="updateStatus(${reservation.id}, 'pending_admin')" style="width: auto; margin-right: 0.5rem;">Approve</button>
+                            <button onclick="updateStatus(${reservation.id}, 'rejected')" style="width: auto; background-color: var(--danger);">Reject</button>
+                        </div>
+                    `;
+                } else if (currentUser.role === 'admin' && reservation.status === 'pending_admin') {
+                    actions = `
+                        <div>
+                            <button onclick="updateStatus(${reservation.id}, 'approved')" style="width: auto; margin-right: 0.5rem;">Approve</button>
+                            <button onclick="updateStatus(${reservation.id}, 'rejected')" style="width: auto; background-color: var(--danger);">Reject</button>
+                        </div>
+                    `;
+                }
+            }
+
+            return `
+                <div class="reservation-item">
+                    <div>
+                        <h4>Room ${reservation.room}</h4>
+                        <p>${reservation.date} at ${reservation.time}</p>
+                        <p>${reservation.purpose}</p>
+                        <span class="status ${statusClasses[reservation.status]}">${statusText[reservation.status]}</span>
+                    </div>
+                    ${actions}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
