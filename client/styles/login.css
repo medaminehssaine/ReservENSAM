@@ -34,3 +34,8 @@ label {
 input {
   margin-bottom: 7px;
 }
+
+input:focus{
+  border-width: 2px;
+  border-color: var(--bg-primary);
+}
