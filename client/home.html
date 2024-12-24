@@ -3,30 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ahendal-2.0</title>
+    <title>Ahendal-2.0 - Dashboard</title>
+    <link href="styles/general.css" rel="stylesheet">
     <link href="styles/home.css" rel="stylesheet">
 </head>
 <body>
     <nav>
         <h1>Room Reservation System</h1>
-        <button onclick="logout()" id="logoutBtn" class="hidden">Logout</button>
+        <button onclick="logout()" id="logoutBtn">Logout</button>
     </nav>
 
     <div class="container">
-        <!-- Login Form -->
-        <div id="loginForm" class="login-container">
-            <h2>Login</h2>
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="username">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password">
-            </div>
-            <button onclick="login()">Login</button>
-        </div>
-
         <!-- Club Dashboard -->
         <div id="clubDashboard" class="hidden">
             <h2>Make a Reservation</h2>
@@ -70,6 +57,7 @@
             <div class="reservation-list" id="adminReservations"></div>
         </div>
     </div>
+    <script src="scripts/general.js"></script>
     <script src="scripts/home.js"></script>
 </body>
 </html>

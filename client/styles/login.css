@@ -1,0 +1,36 @@
+body {
+  background-image: url('../assets/signing.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.login-container {
+  max-width: 500px;
+  margin: 5rem auto;
+  padding: 3rem;
+  background-color: var(--bg-secondary);
+  border-radius: 16px;
+}
+
+.login-title {
+  font-size: 1.75rem;
+  font-family: 'Quantify', sans-serif;
+  font-weight: 400;
+  margin-bottom: 25px;
+}
+
+.login-button {
+  margin-top: 15px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-family: 'Quantify', sans-serif;
+}
+
+label {
+  color: rgb(20, 3, 66);
+  font-family: 'Quantify', sans-serif;
+}
+
+input {
+  margin-bottom: 7px;
+}
