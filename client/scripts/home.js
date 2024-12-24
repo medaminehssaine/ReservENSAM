@@ -1,5 +1,6 @@
 // Check authentication on page load
-checkAuth();
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+checkAuth(currentUser);
 
 // Show appropriate dashboard based on user role
 window.addEventListener('DOMContentLoaded', () => {
