@@ -1,8 +1,46 @@
+.container {
+  margin-bottom: 30px;
+}
+
+#clubDashboard {
+  margin-left: 1vw;
+}
+
+.dashboard-title {
+  color: var(--text-secondary);
+  font-family: 'Quantify', sans-serif;
+  font-weight: 400;
+  margin: 30px 0;
+}
+
+.form-label {
+  color: var(--text-secondary);
+  font-family: 'Quantify', sans-serif;
+}
+
+.submit-button-container {
+  display: flex;
+  justify-content: center;
+}
+
+.submit-button {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  width: 200px;
+  font-family: 'Quantify', sans-serif;
+}
+
 .reservation-list {
   background-color: var(--bg-secondary);
   padding: 1rem;
   border-radius: 8px;
   margin-top: 1rem;
+}
+
+.reservation-list-title {
+  margin-bottom: 20px;
+  font-family: 'Quantify', sans-serif;
+  font-weight: 400;
 }
 
 .reservation-item {

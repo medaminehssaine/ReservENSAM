@@ -6,42 +6,50 @@
     <title>ReservENSAM</title>
     <link href="styles/general.css" rel="stylesheet">
     <link href="styles/home.css" rel="stylesheet">
+        <link href="https://fonts.cdnfonts.com/css/quantify" rel="stylesheet">
 </head>
 <body>
     <nav>
-        <h1>Room Reservation System</h1>
-        <button onclick="logout()" id="logoutBtn">Logout</button>
+        <h1>ReservENSAM</h1>
+        <h1 class="club-name">GADZ'IT</h1> <!-- JS -->
     </nav>
 
     <div class="container">
         <!-- Club Dashboard -->
         <div id="clubDashboard" class="hidden">
-            <h2>Make a Reservation</h2>
+            <h2 class="dashboard-title">Make a Reservation</h2>
             <div class="form-group">
-                <label>Room</label>
+                <label class="form-label">Room</label>
                 <select id="room">
-                    <option value="room1">Room 1</option>
-                    <option value="room2">Room 2</option>
-                    <option value="room3">Room 3</option>
+                    <optgroup label="Dep Math-Info">
+                        <option value="room1">CC 13</option>
+                        <option value="room2">CC 14</option>
+                    </optgroup>
+                    <optgroup label="Dep Energ">
+                        <option value="room1">Room 1</option>
+                        <option value="room3">Room 2</option>
+                    </optgroup>
                 </select>
-            </div>
+            </div> <!-- JS -->
             <div class="form-group">
-                <label>Date</label>
+                <label class="form-label">Date</label>
                 <input type="date" id="date">
             </div>
             <div class="form-group">
-                <label>Time</label>
+                <label class="form-label">Time</label>
                 <input type="time" id="time">
             </div>
             <div class="form-group">
-                <label>Purpose</label>
+                <label class="form-label">Purpose</label>
                 <textarea id="purpose"></textarea>
             </div>
-            <button onclick="submitReservation()">Submit Request</button>
+            <div class="submit-button-container">
+                <button class="submit-button" onclick="submitReservation()">Submit Request</button>
+            </div>
 
             <div class="reservation-list">
-                <h3>Your Reservations</h3>
-                <div id="clubReservations"></div>
+                <h3 class="reservation-list-title">Your Reservations</h3>
+                <div id="clubReservations"></div> <!-- JS -->
             </div>
         </div>
 
