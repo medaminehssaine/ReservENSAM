@@ -1,5 +1,5 @@
-.dashboard-grid {
-  padding: 2rem;
+.container {
+  padding: 0.5rem;
 }
 
 #clubDashboard {
@@ -117,7 +117,7 @@
 @media (max-width: 768px) {
   #clubDashboard {
     grid-template-columns: 1fr;
-    padding: 1rem; /* Adjust padding for smaller screens */
+    padding: 0.5rem; /* Adjust padding for smaller screens */
     gap: 1.5rem; /* Slightly reduce the gap for compact view */
   }
 }
