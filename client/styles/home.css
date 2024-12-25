@@ -120,4 +120,13 @@
     padding: 0.5rem; /* Adjust padding for smaller screens */
     gap: 1.5rem; /* Slightly reduce the gap for compact view */
   }
+
+  .container {
+    padding: 0.7rem;
+  }
+
+  nav {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
 }
