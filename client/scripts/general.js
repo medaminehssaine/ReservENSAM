@@ -1,6 +1,7 @@
 const users = {
     'club1': { password: 'club123', role: 'club' },
     'club2': { password: 'club456', role: 'club' },
+    'club3': { password: 'club789', role: 'club' },
     'adeam': { password: 'adeam123', role: 'adeam' },
     'admin': { password: 'admin123', role: 'admin' }
 };
