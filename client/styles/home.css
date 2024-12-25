@@ -13,6 +13,9 @@
 }
 
 
+#purpose {
+  resize: none;
+}
 
 .make-reservation, .view-reservations {
   background: var(--bg-secondary);
