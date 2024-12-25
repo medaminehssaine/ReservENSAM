@@ -1,12 +1,10 @@
 .dashboard-grid {
-  display: grid;
-  gap: 2rem;
   padding: 2rem;
 }
 
 #clubDashboard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(40rem, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
   padding: 2rem;
   max-width: 90rem;
@@ -45,7 +43,7 @@
 }
 
 .reservations-scroll {
-  max-height: 50vh;
+  max-height: 60vh;
   overflow-y: auto;
   padding-right: 1rem;
 }
