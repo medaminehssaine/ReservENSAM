@@ -1,8 +1,6 @@
-// Check authentication on page load
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-checkAuth(currentUser);
+const currentUser = checkAuth();
+let reservations = JSON.parse(localStorage.getItem('reservations')) || [];
 
-// Show appropriate dashboard based on user role
 window.addEventListener('DOMContentLoaded', () => {
     switch(currentUser.role) {
         case 'club':
@@ -41,37 +39,40 @@ function submitReservation() {
     };
 
     reservations.push(reservation);
+    localStorage.setItem('reservations', JSON.stringify(reservations));
     updateDashboard();
     clearForm();
 }
 
 function clearForm() {
-    document.getElementById('room').value = 'room1';
+    document.getElementById('room').value = '';
     document.getElementById('date').value = '';
     document.getElementById('time').value = '';
     document.getElementById('purpose').value = '';
 }
 
 function updateStatus(id, status) {
-    const reservation = reservations.find(r => r.id === id);
-    if (reservation) {
-        reservation.status = status;
-        updateDashboard();
-    }
+    reservations = reservations.map(r => 
+        r.id === id ? {...r, status} : r
+    );
+    localStorage.setItem('reservations', JSON.stringify(reservations));
+    updateDashboard();
 }
 
 function updateDashboard() {
+    const storedReservations = JSON.parse(localStorage.getItem('reservations')) || [];
+    
     switch(currentUser.role) {
         case 'club':
-            const clubReservations = reservations.filter(r => r.club === currentUser.username);
-            document.getElementById('clubReservations').innerHTML = clubReservations.map(renderReservation).join('');
+            const clubReservations = storedReservations.filter(r => r.club === currentUser.username);
+            document.getElementById('clubReservations').innerHTML = clubReservations.map(r => renderReservation(r)).join('');
             break;
         case 'adeam':
-            const adeamReservations = reservations.filter(r => r.status === 'pending_adeam');
+            const adeamReservations = storedReservations.filter(r => r.status === 'pending_adeam');
             document.getElementById('adeamReservations').innerHTML = adeamReservations.map(r => renderReservation(r, true)).join('');
             break;
         case 'admin':
-            const adminReservations = reservations.filter(r => r.status === 'pending_admin');
+            const adminReservations = storedReservations.filter(r => r.status === 'pending_admin');
             document.getElementById('adminReservations').innerHTML = adminReservations.map(r => renderReservation(r, true)).join('');
             break;
     }
@@ -96,16 +97,16 @@ function renderReservation(reservation, showActions = false) {
     if (showActions) {
         if (currentUser.role === 'adeam' && reservation.status === 'pending_adeam') {
             actions = `
-                <div>
-                    <button onclick="updateStatus(${reservation.id}, 'pending_admin')" style="width: auto; margin-right: 0.5rem;">Approve</button>
-                    <button onclick="updateStatus(${reservation.id}, 'rejected')" style="width: auto; background-color: var(--danger);">Reject</button>
+                <div class="reservation-actions">
+                    <button onclick="updateStatus(${reservation.id}, 'pending_admin')">Approve</button>
+                    <button onclick="updateStatus(${reservation.id}, 'rejected')" class="danger-btn">Reject</button>
                 </div>
             `;
         } else if (currentUser.role === 'admin' && reservation.status === 'pending_admin') {
             actions = `
-                <div>
-                    <button onclick="updateStatus(${reservation.id}, 'approved')" style="width: auto; margin-right: 0.5rem;">Approve</button>
-                    <button onclick="updateStatus(${reservation.id}, 'rejected')" style="width: auto; background-color: var(--danger);">Reject</button>
+                <div class="reservation-actions">
+                    <button onclick="updateStatus(${reservation.id}, 'approved')">Approve</button>
+                    <button onclick="updateStatus(${reservation.id}, 'rejected')" class="danger-btn">Reject</button>
                 </div>
             `;
         }
@@ -113,10 +114,10 @@ function renderReservation(reservation, showActions = false) {
 
     return `
         <div class="reservation-item">
-            <div>
+            <div class="reservation-details">
                 <h4>Room ${reservation.room}</h4>
-                <p>${reservation.date} at ${reservation.time}</p>
-                <p>${reservation.purpose}</p>
+                <p class="reservation-date">${reservation.date} at ${reservation.time}</p>
+                <p class="reservation-purpose">${reservation.purpose}</p>
                 <span class="status ${statusClasses[reservation.status]}">${statusText[reservation.status]}</span>
             </div>
             ${actions}

@@ -1,5 +1,4 @@
 body {
-  background-image: url('../assets/signing.svg');
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -7,7 +6,7 @@ body {
 .login-container {
   max-width: 500px;
   margin: auto;
-  margin-top: 70px;
+  margin-top: 10rem;
   padding: 3rem;
   background-color: var(--bg-secondary);
   border-radius: 16px;

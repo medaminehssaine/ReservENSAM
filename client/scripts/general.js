@@ -1,21 +1,28 @@
 const users = {
-  'club1': { password: 'club123', role: 'club' },
-  'adeam': { password: 'adeam123', role: 'adeam' },
-  'admin': { password: 'admin123', role: 'admin' }
+    'club1': { password: 'club123', role: 'club' },
+    'club2': { password: 'club456', role: 'club' },
+    'adeam': { password: 'adeam123', role: 'adeam' },
+    'admin': { password: 'admin123', role: 'admin' }
 };
-localStorage.setItem("users", JSON.stringify(users));
+// Initialize users in localStorage if not exists
+if (!localStorage.getItem('users')) {
+  localStorage.setItem('users', JSON.stringify(users));
+}
 
-let reservations = [];
+// Initialize reservations in localStorage if not exists
+if (!localStorage.getItem('reservations')) {
+  localStorage.setItem('reservations', JSON.stringify([]));
+}
 
-// Logout function
 function logout() {
-  localStorage.setItem("currentUser", JSON.stringify(null));
+  localStorage.removeItem('currentUser');
   window.location.href = 'login.html';
 }
 
-// Check Authentication function
-function checkAuth(currentUser) {
+function checkAuth() {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    window.location.href = 'login.html';
+      window.location.href = 'login.html';
   }
+  return currentUser;
 }

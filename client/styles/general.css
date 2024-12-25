@@ -18,7 +18,9 @@
 }
 
 body {
-  background-color: var(--bg-primary);
+  background-image: url(../assets/signing.svg);
+  background-size: cover;
+  background-repeat: no-repeat;
   color: var(--text-primary);
   min-height: 100vh;
 }
@@ -37,8 +39,21 @@ nav h1 {
   font-weight: 400;
 }
 
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.logout-btn {
+  width: auto;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
+  margin: 0 auto;
   padding: 0 1rem;
 }
 
@@ -56,7 +71,7 @@ label {
 input, select, textarea {
   width: 100%;
   padding: 0.6rem;
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-tertiary);
   outline: none;
   border: 1px solid rgb(221, 221, 221);
   font-weight: 500;

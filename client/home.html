@@ -6,60 +6,62 @@
     <title>ReservENSAM</title>
     <link href="styles/general.css" rel="stylesheet">
     <link href="styles/home.css" rel="stylesheet">
-        <link href="https://fonts.cdnfonts.com/css/quantify" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/quantify" rel="stylesheet">
 </head>
 <body>
     <nav>
         <h1>ReservENSAM</h1>
-        <h1 class="club-name">GADZ'IT</h1> <!-- JS -->
+        <div class="nav-right">
+            <h1 class="club-name">GADZ'IT</h1>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
     </nav>
 
-    <div class="container">
-        <!-- Club Dashboard -->
+    <div class="container dashboard-grid">
         <div id="clubDashboard" class="hidden">
-            <h2 class="dashboard-title">Make a Reservation</h2>
-            <div class="form-group">
-                <label class="form-label">Room</label>
-                <select id="room">
-                    <optgroup label="Dep Math-Info">
-                        <option value="room1">CC 13</option>
-                        <option value="room2">CC 14</option>
-                    </optgroup>
-                    <optgroup label="Dep Energ">
-                        <option value="room1">Room 1</option>
-                        <option value="room3">Room 2</option>
-                    </optgroup>
-                </select>
-            </div> <!-- JS -->
-            <div class="form-group">
-                <label class="form-label">Date</label>
-                <input type="date" id="date">
+            <div class="make-reservation">
+                <h2 class="dashboard-title">Make a Reservation</h2>
+                <div class="form-group">
+                    <label class="form-label">Room</label>
+                    <select id="room">
+                        <optgroup label="Dep Math-Info">
+                            <option value="CC 13">CC 13</option>
+                            <option value="CC 14">CC 14</option>
+                        </optgroup>
+                        <optgroup label="Dep Energ">
+                            <option value="Room 1">Room 1</option>
+                            <option value="Room 2">Room 2</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" id="date">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Time</label>
+                    <input type="time" id="time">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Purpose</label>
+                    <textarea id="purpose"></textarea>
+                </div>
+                <div class="submit-button-container">
+                    <button class="submit-button" onclick="submitReservation()">Submit Request</button>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Time</label>
-                <input type="time" id="time">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Purpose</label>
-                <textarea id="purpose"></textarea>
-            </div>
-            <div class="submit-button-container">
-                <button class="submit-button" onclick="submitReservation()">Submit Request</button>
-            </div>
-
-            <div class="reservation-list">
-                <h3 class="reservation-list-title">Your Reservations</h3>
-                <div id="clubReservations"></div> <!-- JS -->
+            
+            <div class="view-reservations">
+                <h2 class="dashboard-title">Your Reservations</h2>
+                <div id="clubReservations" class="reservations-scroll"></div>
             </div>
         </div>
 
-        <!-- ADEAM Dashboard -->
         <div id="adeamDashboard" class="hidden">
             <h2>Pending Approvals</h2>
             <div class="reservation-list" id="adeamReservations"></div>
         </div>
 
-        <!-- Admin Dashboard -->
         <div id="adminDashboard" class="hidden">
             <h2>Final Approvals</h2>
             <div class="reservation-list" id="adminReservations"></div>
