@@ -124,3 +124,15 @@ function renderReservation(reservation, showActions = false) {
         </div>
     `;
 }
+
+const dateConfig = {
+    mode: "multiple",
+    dateFormat: "Y-m-d",
+    enableTime: false,
+    conjunction: ", ",
+    minDate: "today",
+    onChange: function(selectedDates, dateStr) {
+        selectedDates = selectedDates.map(date => date.toISOString().split('T')[0]);
+    }
+};
+flatpickr("#multiple-dates", dateConfig);

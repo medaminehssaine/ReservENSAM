@@ -12,8 +12,20 @@
   justify-content: space-around;
 }
 
+.time-interval {
+  display: flex;
+  align-items: center;
+}
 
-#purpose {
+.time-interval input[type="time"] {
+  margin-right: 10px;
+}
+
+.time-interval span {
+  margin-right: 10px;
+}
+
+textarea {
   resize: none;
 }
 
@@ -115,6 +127,38 @@
 
 .status-rejected {
   background-color: var(--danger);
+}
+
+.is-selected {
+  background: #33aaff !important;
+  color: #fff !important;
+}
+.flatpickr-day.selected {
+  background: #33aaff;
+  border-color: #33aaff;
+}
+
+.form-group-inline {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.form-group-inline .form-group {
+  flex: 1;
+  margin-right: 10px;
+  min-width: 150px;
+}
+
+.form-group-inline .form-group:last-child {
+  margin-right: 0;
+}
+
+.equipment-label {
+  color: var(--bg-primary);
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 0.5rem;
 }
 
 @media (max-width: 768px) {

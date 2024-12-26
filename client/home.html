@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,62 +7,113 @@
     <link href="styles/general.css" rel="stylesheet">
     <link href="styles/home.css" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/quantify" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
     <nav>
         <h1>ReservENSAM</h1>
         <div class="nav-right">
-            <button onclick="logout()" class="logout-btn">Logout</button>
+            <button onclick="logout()" class="logout-btn">Déconnexion</button>
         </div>
     </nav>
 
     <div class="container">
         <div id="clubDashboard" class="hidden">
             <div class="make-reservation">
-                <h2 class="dashboard-title">Make a Reservation</h2>
+                <h2 class="dashboard-title">Effectuer une Réservation</h2>
                 <div class="form-group">
-                    <label class="form-label">Room</label>
+                    <label class="form-label">Objet de l'événement</label>
+                    <textarea id="objet"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type de l'événement</label>
+                    <select id="type">
+                        <option value="Réunion">Réunion</option>
+                        <option value="Assemblée générale">Assemblée générale</option>
+                        <option value="Animations">Animations</option>
+                        <option value="Formation">Formation</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="form-group-inline">
+                    <div class="form-group">
+                        <label class="form-label" for="participants-internes">Nombre de participants internes</label>
+                        <input id="participants-internes" name="participants_internes" type="number" min="0" step="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="participants-externes">Nombre de participants externes</label>
+                        <input id="participants-externes" name="participants_externes" type="number" min="0" step="1" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Dates de réservation</label>
+                    <input type="text" id="multiple-dates" placeholder="Sélectionnez vos dates">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Heure</label>
+                    <div class="time-interval">
+                        <input type="time" id="start-time">
+                        <span>à</span>
+                        <input type="time" id="end-time">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Salle</label>
                     <select id="room">
-                        <optgroup label="Dep Math-Info">
+                        <optgroup label="Dép Math-Info">
                             <option value="CC 13">CC 13</option>
                             <option value="CC 14">CC 14</option>
                         </optgroup>
-                        <optgroup label="Dep Energ">
-                            <option value="Room 1">Room 1</option>
-                            <option value="Room 2">Room 2</option>
+                        <optgroup label="Dép Énerg">
+                            <option value="Room 1">Salle 1</option>
+                            <option value="Room 2">Salle 2</option>
                         </optgroup>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Date</label>
-                    <input type="date" id="date">
+                    <label class="form-label">Équipements</label>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Time</label>
-                    <input type="time" id="time">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Purpose</label>
-                    <textarea id="purpose"></textarea>
+                <div class="form-group-inline">
+                    <div class="form-group">
+                        <label class="equipment-label" for="tables">Tables</label>
+                        <input id="tables" name="tables" type="number" min="0" step="1" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="equipment-label" for="chaises">Chaises</label>
+                        <input id="chaises" name="chaises" type="number" min="0" step="1" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="equipment-label" for="sonorisation">Sonorisation</label>
+                        <input id="sonorisation" name="sonorisation" type="number" min="0" step="1" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="equipment-label" for="videoprojecteurs">Vidéoprojecteurs</label>
+                        <input id="videoprojecteurs" name="videoprojecteurs" type="number" min="0" step="1" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="equipment-label" for="autres">Autres</label>
+                        <input id="autres" name="autres" type="text" placeholder="Précisez les autres équipements">
+                    </div>
                 </div>
                 <div class="submit-button-container">
-                    <button class="submit-button" onclick="submitReservation()">Submit Request</button>
+                    <button class="submit-button" onclick="submitReservation()">Soumettre la Demande</button>
                 </div>
             </div>
             
             <div class="view-reservations">
-                <h2 class="dashboard-title">Your Reservations</h2>
+                <h2 class="dashboard-title">Vos Réservations</h2>
                 <div id="clubReservations" class="reservations-scroll"></div>
             </div>
         </div>
 
         <div id="adeamDashboard" class="hidden">
-            <h2 >Pending Approvals</h2>
+            <h2>Approbations en Attente</h2>
             <div class="reservation-list" id="adeamReservations"></div>
         </div>
 
         <div id="adminDashboard" class="hidden">
-            <h2>Final Approvals</h2>
+            <h2>Approbations Finales</h2>
             <div class="reservation-list" id="adminReservations"></div>
         </div>
     </div>
