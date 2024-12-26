@@ -1,6 +1,7 @@
 const currentUser = checkAuth();
 let reservations = JSON.parse(localStorage.getItem('reservations')) || [];
 let selectedDates = [];
+let currentRequestId = null;
 
 window.addEventListener('DOMContentLoaded', () => {
     switch(currentUser.role) {
@@ -24,6 +25,28 @@ window.addEventListener('DOMContentLoaded', () => {
         onChange: function(dates) {
             selectedDates = dates.map(date => date.toISOString().split('T')[0]);
         }
+    });
+
+    document.querySelector('.approve-btn').addEventListener('click', () => {
+        const newStatus = currentUser.role === 'adeam' ? 'pending_admin' : 'approved';
+        updateStatus(currentRequestId, newStatus);
+        document.getElementById('requestModal').classList.remove('active');
+    });
+
+    document.querySelector('.reject-btn').addEventListener('click', () => {
+        document.querySelector('.rejection-form').classList.remove('hidden');
+    });
+
+    document.querySelector('.confirm-reject-btn').addEventListener('click', () => {
+        const reason = document.getElementById('rejectionReason').value.trim();
+        if (!reason) {
+            alert('Veuillez fournir une raison de rejet');
+            return;
+        }
+        updateStatus(currentRequestId, 'rejected', reason);
+        document.getElementById('requestModal').classList.remove('active');
+        document.querySelector('.rejection-form').classList.add('hidden');
+        document.getElementById('rejectionReason').value = '';
     });
 });
 
@@ -123,9 +146,9 @@ function clearForm() {
     selectedDates = [];
 }
 
-function updateStatus(id, status) {
+function updateStatus(id, status, reason = '') {
     reservations = reservations.map(r => 
-        r.id === id ? {...r, status} : r
+        r.id === id ? {...r, status, reason} : r
     );
     localStorage.setItem('reservations', JSON.stringify(reservations));
     updateDashboard();
@@ -136,14 +159,19 @@ function updateDashboard() {
     
     switch(currentUser.role) {
         case 'club':
-            document.getElementById('clubReservations').innerHTML = storedReservations.map(r => renderReservation(r)).join('');
+            document.getElementById('clubReservations').innerHTML = 
+                storedReservations.filter(r => r.userId === currentUser.username)
+                    .map(r => renderReservation(r)).join('');
             break;
         case 'adeam':
-            document.getElementById('adeamReservations').innerHTML = storedReservations.map(r => renderReservation(r, true)).join('');
+            document.getElementById('adeamReservations').innerHTML = 
+                storedReservations.filter(r => r.status === 'pending_adeam')
+                    .map(r => renderReservation(r, true)).join('');
             break;
         case 'admin':
-            const adminReservations = storedReservations.filter(r => r.status === 'pending_admin');
-            document.getElementById('adminReservations').innerHTML = storedReservations.map(r => renderReservation(r, true)).join('');
+            document.getElementById('adminReservations').innerHTML = 
+                storedReservations.filter(r => r.status === 'pending_admin')
+                    .map(r => renderReservation(r, true)).join('');
             break;
     }
 }
@@ -156,44 +184,111 @@ function renderReservation(reservation, showActions = false) {
         'rejected': 'status-rejected'
     };
 
-    const statusText = {
-        'pending_adeam': 'Pending ADEAM Approval',
-        'pending_admin': 'Pending Admin Approval',
-        'approved': 'Approved',
-        'rejected': 'Rejected'
+    const statusLabels = {
+        'pending_adeam': 'En attente ADEAM',
+        'pending_admin': 'En attente Admin',
+        'approved': 'Approuvé',
+        'rejected': 'Rejeté'
     };
 
     let actions = '';
     if (showActions) {
-        if (currentUser.role === 'adeam' && reservation.status === 'pending_adeam') {
-            actions = `
-                <div class="reservation-actions">
-                    <button onclick="updateStatus(${reservation.id}, 'pending_admin')">Approve</button>
-                    <button onclick="updateStatus(${reservation.id}, 'rejected')" class="danger-btn">Reject</button>
-                </div>
-            `;
-        } else if (currentUser.role === 'admin' && reservation.status === 'pending_admin') {
-            actions = `
-                <div class="reservation-actions">
-                    <button onclick="updateStatus(${reservation.id}, 'approved')">Approve</button>
-                    <button onclick="updateStatus(${reservation.id}, 'rejected')" class="danger-btn">Reject</button>
-                </div>
-            `;
-        }
+        const actionButtons = currentUser.role === 'adeam' ? 
+            `<button onclick="updateStatus('${reservation.id}', 'pending_admin')" class="action-button accept-button">Approuver</button>` :
+            `<button onclick="updateStatus('${reservation.id}', 'approved')" class="action-button accept-button">Approuver</button>`;
+            
+        actions = `
+            <div class="reservation-actions">
+                ${actionButtons}
+                <button onclick="showRejectForm('${reservation.id}')" class="action-button reject-button">Rejeter</button>
+            </div>
+        `;
     }
 
     return `
-        <div class="reservation-item">
+        <div class="reservation-item" onclick="showRequestDetails('${reservation.id}')">
             <div class="reservation-details">
-                <h4>Room ${reservation.room}</h4>
-                <p class="reservation-date">${reservation.date} de ${reservation.startTime} à ${reservation.startTime}</p>
+                <h4>${reservation.userName}</h4>
+                <p class="reservation-date">${reservation.date} • ${reservation.startTime} - ${reservation.endTime}</p>
+                <p class="reservation-room">Salle ${reservation.room}</p>
                 <p class="reservation-purpose">${reservation.objet}</p>
-                <span class="status ${statusClasses[reservation.status]}">${statusText[reservation.status]}</span>
+                <span class="status ${statusClasses[reservation.status]}">${statusLabels[reservation.status]}</span>
             </div>
             ${actions}
         </div>
     `;
 }
+
+function showRequestDetails(requestId) {
+    currentRequestId = requestId;
+    const request = reservations.find(r => r.id === requestId);
+    if (!request) return;
+
+    const modal = document.getElementById('requestModal');
+    const content = document.getElementById('modalContent');
+    
+    content.innerHTML = `
+        <h2 class="modal-title">Détails de la Demande</h2>
+        <div class="request-detail-grid">
+            <p><strong>Club:</strong> ${request.userName}</p>
+            <p><strong>Salle:</strong> ${request.room}</p>
+            <p><strong>Date:</strong> ${request.date}</p>
+            <p><strong>Horaire:</strong> ${request.startTime} - ${request.endTime}</p>
+            <p><strong>Type:</strong> ${request.type}</p>
+            <p><strong>Objet:</strong> ${request.objet}</p>
+            <p><strong>Participants:</strong> ${request.participantsInternes} internes, ${request.participantsExternes} externes</p>
+            <h3>Équipements:</h3>
+            <ul>
+                <li>Tables: ${request.equipment.tables}</li>
+                <li>Chaises: ${request.equipment.chaises}</li>
+                <li>Sonorisation: ${request.equipment.sonorisation}</li>
+                <li>Vidéoprojecteurs: ${request.equipment.videoprojecteurs}</li>
+                ${request.equipment.autres ? `<li>Autres: ${request.equipment.autres}</li>` : ''}
+            </ul>
+        </div>
+    `;
+
+    modal.classList.add('active');
+}
+
+// Add event listeners for modal close and confirm reject
+document.querySelector('.modal-close').addEventListener('click', () => {
+    document.getElementById('requestModal').classList.remove('active');
+});
+
+document.querySelector('.confirm-reject').addEventListener('click', () => {
+    const reason = document.getElementById('rejectionReason').value;
+    if (!reason) {
+        alert('Veuillez fournir une raison de rejet');
+        return;
+    }
+    updateStatus(currentRequestId, 'rejected', reason);
+    document.getElementById('requestModal').classList.remove('active');
+    document.querySelector('.rejection-form').classList.add('hidden');
+    document.getElementById('rejectionReason').value = '';
+});
+
+document.querySelector('.approve-btn').addEventListener('click', () => {
+    const newStatus = currentUser.role === 'adeam' ? 'pending_admin' : 'approved';
+    updateStatus(currentRequestId, newStatus);
+    document.getElementById('requestModal').classList.remove('active');
+});
+
+document.querySelector('.reject-btn').addEventListener('click', () => {
+    document.querySelector('.rejection-form').classList.remove('hidden');
+});
+
+document.querySelector('.confirm-reject-btn').addEventListener('click', () => {
+    const reason = document.getElementById('rejectionReason').value;
+    if (!reason) {
+        alert('Veuillez fournir une raison de rejet');
+        return;
+    }
+    updateStatus(currentRequestId, 'rejected', reason);
+    document.getElementById('requestModal').classList.remove('active');
+    document.querySelector('.rejection-form').classList.add('hidden');
+    document.getElementById('rejectionReason').value = '';
+});
 
 const dateConfig = {
     mode: "multiple",
