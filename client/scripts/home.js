@@ -20,7 +20,6 @@ window.addEventListener('DOMContentLoaded', () => {
     flatpickr("#multiple-dates", {
         mode: "multiple",
         dateFormat: "Y-m-d",
-        locale: "fr",
         minDate: "today",
         onChange: function(dates) {
             selectedDates = dates.map(date => date.toISOString().split('T')[0]);
@@ -69,7 +68,7 @@ function submitReservation() {
             videoprojecteurs: parseInt(videoprojecteurs),
             autres
         },
-        status: 'pending',
+        status: 'pending_adeam',
         userId: currentUser.id,
         userName: currentUser.name
     }));
@@ -137,16 +136,14 @@ function updateDashboard() {
     
     switch(currentUser.role) {
         case 'club':
-            const clubReservations = storedReservations.filter(r => r.club === currentUser.username);
-            document.getElementById('clubReservations').innerHTML = clubReservations.map(r => renderReservation(r)).join('');
+            document.getElementById('clubReservations').innerHTML = storedReservations.map(r => renderReservation(r)).join('');
             break;
         case 'adeam':
-            const adeamReservations = storedReservations.filter(r => r.status === 'pending_adeam');
-            document.getElementById('adeamReservations').innerHTML = adeamReservations.map(r => renderReservation(r, true)).join('');
+            document.getElementById('adeamReservations').innerHTML = storedReservations.map(r => renderReservation(r, true)).join('');
             break;
         case 'admin':
             const adminReservations = storedReservations.filter(r => r.status === 'pending_admin');
-            document.getElementById('adminReservations').innerHTML = adminReservations.map(r => renderReservation(r, true)).join('');
+            document.getElementById('adminReservations').innerHTML = storedReservations.map(r => renderReservation(r, true)).join('');
             break;
     }
 }
@@ -189,8 +186,8 @@ function renderReservation(reservation, showActions = false) {
         <div class="reservation-item">
             <div class="reservation-details">
                 <h4>Room ${reservation.room}</h4>
-                <p class="reservation-date">${reservation.date} at ${reservation.time}</p>
-                <p class="reservation-purpose">${reservation.purpose}</p>
+                <p class="reservation-date">${reservation.date} de ${reservation.startTime} à ${reservation.startTime}</p>
+                <p class="reservation-purpose">${reservation.objet}</p>
                 <span class="status ${statusClasses[reservation.status]}">${statusText[reservation.status]}</span>
             </div>
             ${actions}

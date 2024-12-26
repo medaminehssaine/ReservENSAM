@@ -58,9 +58,15 @@ textarea {
 }
 
 .reservations-scroll {
-  max-height: 60vh;
+  max-height: 750px;
   overflow-y: auto;
   padding-right: 1rem;
+}
+
+@media (max-width: 1195px) {
+  .reservations-scroll {
+    height: 900px;
+  }
 }
 
 .reservations-scroll::-webkit-scrollbar {
