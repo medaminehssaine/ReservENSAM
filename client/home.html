@@ -9,125 +9,6 @@
     <link href="https://fonts.cdnfonts.com/css/quantify" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <style>
-        /* Queue container */
-        .requests-queue {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .queue-title {
-            color: var(--text-primary);
-            font-family: 'Quantify', sans-serif;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        /* Request cards */
-        .request-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .request-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .request-card h3 {
-            margin: 0;
-            color: var(--text-primary);
-            font-family: 'Quantify', sans-serif;
-        }
-
-        .request-info {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            color: var(--text-secondary);
-        }
-
-        /* States */
-        .request-card.rejected {
-            border-left: 4px solid #ff4444;
-            opacity: 0.7;
-        }
-
-        .request-card.accepted {
-            border-left: 4px solid #00C851;
-        }
-
-        .rejection-reason {
-            margin-top: 10px;
-            padding: 8px;
-            background: rgba(255, 0, 0, 0.1);
-            border-radius: 5px;
-            font-style: italic;
-        }
-
-        /* Detail popup */
-        .detail-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--background);
-            padding: 25px;
-            border-radius: 15px;
-            z-index: 1000;
-            min-width: 400px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .popup-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            z-index: 999;
-        }
-
-        /* Actions */
-        .request-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .action-button {
-            padding: 8px 15px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            font-family: 'Quantify', sans-serif;
-            transition: opacity 0.2s;
-        }
-
-        .action-button:hover {
-            opacity: 0.8;
-        }
-
-        .accept-button {
-            background: #00C851;
-            color: white;
-        }
-
-        .reject-button {
-            background: #ff4444;
-            color: white;
-        }
-    </style>
 </head>
 <body>
     <nav>
@@ -150,7 +31,7 @@
                     <select id="type">
                         <option value="Réunion">Réunion</option>
                         <option value="Assemblée générale">Assemblée générale</option>
-                        <option value="Animations">Animations</option>
+                        <option value="Animations">Animation</option>
                         <option value="Formation">Formation</option>
                         <option value="Autre">Autre</option>
                     </select>
@@ -240,31 +121,17 @@
             </div>
         </div>
         
-        <!-- Detail Popup -->
-        <div class="popup-backdrop" style="display: none;">
-            <div class="detail-popup">
-                <h2>Request Details</h2>
-                <!-- Detailed information -->
-                <div class="request-actions">
-                    <button class="action-button accept-button">Accept</button>
-                    <button class="action-button reject-button">Reject</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Modal for request details -->
         <div class="modal" id="requestModal">
             <div class="modal-content">
                 <button class="modal-close">&times;</button>
                 <div id="modalContent"></div>
                 <div class="modal-actions">
-                    <!-- Re-added buttons with correct classes -->
                     <button class="action-button accept-button approve-btn">Approuver</button>
                     <button class="action-button reject-button reject-btn">Rejeter</button>
                 </div>
                 <div class="rejection-form hidden">
                     <textarea id="rejectionReason" placeholder="Raison du rejet..."></textarea>
-                    <!-- Renamed to match JS selector -->
                     <button class="action-button reject-button confirm-reject-btn">Confirmer</button>
                 </div>
             </div>

@@ -1,278 +1,34 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReservENSAM</title>
-    <link href="styles/general.css" rel="stylesheet">
-    <link href="styles/login.css" rel="stylesheet">
-    <link href="https://fonts.cdnfonts.com/css/quantify" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReservENSAM</title>
+  <link href="styles/general.css" rel="stylesheet">
+  <link href="styles/login.css" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/quantify" rel="stylesheet">
 </head>
 <body>
-    <nav>
-        <h1>ReservENSAM</h1>
-    </nav>
+  <nav>
+    <h1>ReservENSAM</h1>
+  </nav>
 
-    <div class="container">
-        <div class="login-container">
-            <h2 class="login-title">Se Connecter</h2>
-            <div class="form-group">
-                <label class="subtit">Nom Utilisateur</label>
-                <input type="text" id="username">
-            </div>
-            <div class="form-group">
-                <label class="subtit">Mot De Passe</label>
-                <input type="password" id="password">
-            </div>
-            <button class="login-button" onclick="login()">Se Connecter</button>
-        </div>
+  <div class="container">
+    <div class="login-container">
+      <h2 class="login-title">Se Connecter</h2>
+      <div class="form-group">
+        <label class="subtit">Nom Utilisateur</label>
+        <input type="text" id="username">
+      </div>
+      <div class="form-group">
+        <label class="subtit">Mot De Passe</label>
+        <input type="password" id="password">
+      </div>
+      <button class="login-button" onclick="login()">Se Connecter</button>
     </div>
+  </div>
 
-    <div id="adeamDashboard" class="hidden">
-        <div class="queue-container">
-            <h2 class="dashboard-title">Demandes en Attente d'Approbation</h2>
-            <div id="adeamQueue" class="reservations-scroll"></div>
-        </div>
-    </div>
-
-    <div id="adminDashboard" class="hidden">
-        <div class="queue-container">
-            <h2 class="dashboard-title">Demandes en Attente d'Approbation Finale</h2>
-            <div id="adminQueue" class="reservations-scroll"></div>
-        </div>
-    </div>
-
-    <!-- Request Details Modal -->
-    <div id="requestModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div id="modalContent"></div>
-            <div class="modal-actions">
-                <button class="approve-btn">Approuver</button>
-                <button class="reject-btn">Rejeter</button>
-            </div>
-            <div class="rejection-form hidden">
-                <textarea id="rejectionReason" placeholder="Raison du rejet..."></textarea>
-                <button class="confirm-reject-btn">Confirmer le rejet</button>
-            </div>
-        </div>
-    </div>
-
-    <style>
-        .queue-container {
-            background: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 8px;
-            max-width: 800px;
-            margin: 2rem auto;
-        }
-
-        .queue-item {
-            background: var(--bg-tertiary);
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            border-left: 4px solid var(--accent);
-        }
-
-        .queue-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .queue-item.rejected {
-            border-left-color: var(--danger);
-            opacity: 0.8;
-        }
-
-        .queue-item.approved {
-            border-left-color: #00C851;
-        }
-
-        .queue-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-
-        .club-name {
-            color: var(--text-primary);
-            font-family: 'Quantify', sans-serif;
-            font-size: 1.2rem;
-        }
-
-        .request-info {
-            color: var(--text-tertiary);
-            font-size: 0.9rem;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 12px;
-            position: relative;
-            width: 90%;
-            max-width: 600px;
-        }
-
-        .close-modal {
-            position: absolute;
-            right: 1.5rem;
-            top: 1.5rem;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-primary);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            justify-content: flex-end;
-        }
-
-        .approve-btn, .reject-btn, .confirm-reject-btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 6px;
-            font-family: 'Quantify', sans-serif;
-            cursor: pointer;
-        }
-
-        .approve-btn {
-            background: #00C851;
-            color: white;
-        }
-
-        .reject-btn, .confirm-reject-btn {
-            background: var(--danger);
-            color: white;
-        }
-
-        .rejection-form {
-            margin-top: 1rem;
-        }
-
-        .rejection-form textarea {
-            width: 100%;
-            margin-bottom: 1rem;
-            min-height: 100px;
-        }
-    </style>
-
-    <script src="scripts/general.js"></script>
-    <script src="scripts/login.js"></script>
-    <script>
-        function updateDashboard() {
-            const storedReservations = JSON.parse(localStorage.getItem('reservations')) || [];
-            
-            switch(currentUser.role) {
-                case 'club':
-                    document.getElementById('clubReservations').innerHTML = 
-                        storedReservations.filter(r => r.userId === currentUser.username)
-                            .map(r => renderReservation(r)).join('');
-                    break;
-                case 'adeam':
-                    document.getElementById('adeamQueue').innerHTML = 
-                        storedReservations.filter(r => r.status === 'pending_adeam')
-                            .map(r => renderQueueItem(r)).join('');
-                    break;
-                case 'admin':
-                    document.getElementById('adminQueue').innerHTML = 
-                        storedReservations.filter(r => r.status === 'pending_admin')
-                            .map(r => renderQueueItem(r)).join('');
-                    break;
-            }
-        }
-
-        function renderQueueItem(request) {
-            return `
-                <div class="queue-item" onclick="showRequestDetails('${request.id}')">
-                    <div class="queue-header">
-                        <span class="club-name">${request.userName}</span>
-                        <span class="request-date">${request.date}</span>
-                    </div>
-                    <div class="request-info">
-                        <span>${request.room} • ${request.startTime} - ${request.endTime}</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        function showRequestDetails(requestId) {
-            const request = reservations.find(r => r.id === requestId);
-            if (!request) return;
-
-            const modal = document.getElementById('requestModal');
-            const content = document.getElementById('modalContent');
-            
-            content.innerHTML = `
-                <h2 class="modal-title">Détails de la Demande</h2>
-                <div class="detail-grid">
-                    <p><strong>Club:</strong> ${request.userName}</p>
-                    <p><strong>Salle:</strong> ${request.room}</p>
-                    <p><strong>Date:</strong> ${request.date}</p>
-                    <p><strong>Horaire:</strong> ${request.startTime} - ${request.endTime}</p>
-                    <p><strong>Type:</strong> ${request.type}</p>
-                    <p><strong>Objet:</strong> ${request.objet}</p>
-                    <p><strong>Participants:</strong> ${request.participantsInternes} internes, ${request.participantsExternes} externes</p>
-                    <h3>Équipements:</h3>
-                    <ul>
-                        <li>Tables: ${request.equipment.tables}</li>
-                        <li>Chaises: ${request.equipment.chaises}</li>
-                        <li>Sonorisation: ${request.equipment.sonorisation}</li>
-                        <li>Vidéoprojecteurs: ${request.equipment.videoprojecteurs}</li>
-                        ${request.equipment.autres ? `<li>Autres: ${request.equipment.autres}</li>` : ''}
-                    </ul>
-                </div>
-            `;
-
-            modal.classList.add('active');
-            currentRequestId = requestId;
-        }
-
-        // Add event listeners
-        document.querySelector('.close-modal').addEventListener('click', () => {
-            document.getElementById('requestModal').classList.remove('active');
-        });
-
-        document.querySelector('.approve-btn').addEventListener('click', () => {
-            const newStatus = currentUser.role === 'adeam' ? 'pending_admin' : 'approved';
-            updateStatus(currentRequestId, newStatus);
-            document.getElementById('requestModal').classList.remove('active');
-        });
-
-        document.querySelector('.reject-btn').addEventListener('click', () => {
-            document.querySelector('.rejection-form').classList.remove('hidden');
-        });
-
-        document.querySelector('.confirm-reject-btn').addEventListener('click', () => {
-            const reason = document.getElementById('rejectionReason').value;
-            if (!reason) {
-                alert('Veuillez fournir une raison de rejet');
-                return;
-            }
-            updateStatus(currentRequestId, 'rejected', reason);
-            document.getElementById('requestModal').classList.remove('active');
-            document.querySelector('.rejection-form').classList.add('hidden');
-            document.getElementById('rejectionReason').value = '';
-        });
-    </script>
+  <script src="scripts/general.js"></script>
+  <script src="scripts/login.js"></script>
 </body>
 </html>
