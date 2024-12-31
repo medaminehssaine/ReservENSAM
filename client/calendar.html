@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation Calendar</title>
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    
+    <style>
+        body {
+            margin: 40px;
+            font-family: Arial, sans-serif;
+        }
+        
+        #calendar-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .fc-event {
+            cursor: pointer;
+        }
+
+        /* Status-based colors */
+        .status-pending_adeam { 
+            background-color: #FFA500 !important; 
+            border-color: #FF8C00 !important; 
+        }
+        .status-approved { 
+            background-color: #90EE90 !important; 
+            border-color: #32CD32 !important; 
+        }
+        .status-rejected { 
+            background-color: #FFB6C1 !important; 
+            border-color: #FF69B4 !important; 
+        }
+
+        .event-tooltip {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="calendar-container">
+        <div id="calendar"></div>
+    </div>
+    <div id="tooltip" class="event-tooltip"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get reservations from localStorage
+            const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+            
+            // Convert reservations to calendar events
+            const events = reservations.map(reservation => {
+                // Combine date with time
+                const startDateTime = `${reservation.date}T${reservation.startTime}`;
+                const endDateTime = `${reservation.date}T${reservation.endTime}`;
+                
+                return {
+                    id: reservation.id,
+                    title: reservation.objet,
+                    start: startDateTime,
+                    end: endDateTime,
+                    className: `status-${reservation.status}`,
+                    extendedProps: {
+                        type: reservation.type,
+                        room: reservation.room,
+                        status: reservation.status,
+                        user: reservation.userName,
+                        participantsInternes: reservation.participantsInternes,
+                        participantsExternes: reservation.participantsExternes,
+                        equipment: reservation.equipment
+                    }
+                };
+            });
+
+            const calendarEl = document.getElementById('calendar');
+            const tooltip = document.getElementById('tooltip');
+            
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                slotMinTime: '08:00:00',
+                slotMaxTime: '20:00:00',
+                editable: false,
+                selectable: false,
+                events: events,
+                
+                eventMouseEnter: function(info) {
+                    const event = info.event;
+                    const rect = info.el.getBoundingClientRect();
+                    
+                    const equipment = event.extendedProps.equipment || {};
+                    const equipmentHtml = Object.entries(equipment)
+                        .filter(([_, value]) => value)
+                        .map(([key, value]) => `${key}: ${value}`)
+                        .join('<br>');
+                    
+                    tooltip.innerHTML = `
+                        <strong>${event.title}</strong><br>
+                        Type: ${event.extendedProps.type}<br>
+                        Room: ${event.extendedProps.room}<br>
+                        Status: ${event.extendedProps.status}<br>
+                        Reserved by: ${event.extendedProps.user}<br>
+                        Internal Participants: ${event.extendedProps.participantsInternes}<br>
+                        External Participants: ${event.extendedProps.participantsExternes}<br>
+                        Time: ${event.start.toLocaleTimeString()} - ${event.end.toLocaleTimeString()}<br>
+                        ${equipmentHtml ? `<br>Equipment:<br>${equipmentHtml}` : ''}
+                    `;
+                    
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = rect.left + window.scrollX + 'px';
+                    tooltip.style.top = rect.bottom + window.scrollY + 'px';
+                },
+                
+                eventMouseLeave: function() {
+                    tooltip.style.display = 'none';
+                },
+
+                eventContent: function(info) {
+                    return {
+                        html: `
+                            <div class="fc-event-main-frame">
+                                <div class="fc-event-title-container">
+                                    <div class="fc-event-title">${info.event.title}</div>
+                                    <div class="fc-event-time">
+                                        ${info.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    };
+                }
+            });
+            
+            calendar.render();
+
+            // Update calendar when localStorage changes
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'reservations') {
+                    const updatedReservations = JSON.parse(e.newValue || '[]');
+                    calendar.removeAllEvents();
+                    calendar.addEventSource(updatedReservations.map(reservation => ({
+                        // ... same event mapping as above
+                    })));
+                }
+            });
+        });
+    </script>
+</body>
+</html>
