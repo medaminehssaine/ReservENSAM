@@ -1,0 +1,84 @@
+-- Create the database
+CREATE DATABASE IF NOT EXISTS reserv_ensam;
+USE reserv_ensam;
+
+-- Create the USER table
+CREATE TABLE USER (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    role ENUM('CLUB', 'ADMIN', 'ADEAM') NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create the ADMIN table
+CREATE TABLE ADMIN (
+    user_id INT PRIMARY KEY,
+    is_super_admin BOOLEAN NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USER(id) ON DELETE CASCADE
+);
+
+-- Create the ADEAM table
+CREATE TABLE ADEAM (
+    user_id INT PRIMARY KEY,
+    FOREIGN KEY (user_id) REFERENCES USER(id) ON DELETE CASCADE
+);
+
+-- Create the CLUB table
+CREATE TABLE CLUB (
+    user_id INT PRIMARY KEY,
+    club_name VARCHAR(255) NOT NULL,
+    president_name VARCHAR(255) NOT NULL,
+    contact_info VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES USER(id) ON DELETE CASCADE
+);
+
+-- Create the ROOM table
+CREATE TABLE ROOM (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    department VARCHAR(255) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create the ROOM_UNAVAILABILITY table
+CREATE TABLE ROOM_UNAVAILABILITY (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    room_id INT NOT NULL,
+    start_date DATETIME NOT NULL,
+    end_date DATETIME NOT NULL,
+    reason VARCHAR(255),
+    created_by INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (room_id) REFERENCES ROOM(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES USER(id) ON DELETE CASCADE
+);
+
+-- Create the RESERVATION table
+CREATE TABLE RESERVATION (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    club_id INT NOT NULL,
+    room_id INT NOT NULL,
+    start_date DATETIME NOT NULL,
+    end_date DATETIME NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    activity_description TEXT,
+    required_equipment TEXT,
+    internal_attendees INT,
+    external_attendees INT,
+    status ENUM('PENDING_ADEAM', 'PENDING_ADMIN', 'APPROVED', 'REJECTED') DEFAULT 'PENDING_ADEAM',
+    rejection_reason TEXT,
+    adeam_approved_by INT,
+    admin_approved_by INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (club_id) REFERENCES CLUB(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (room_id) REFERENCES ROOM(id) ON DELETE CASCADE,
+    FOREIGN KEY (adeam_approved_by) REFERENCES ADEAM(user_id),
+    FOREIGN KEY (admin_approved_by) REFERENCES ADMIN(user_id)
+);
