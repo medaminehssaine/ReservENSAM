@@ -162,6 +162,33 @@
                 }
             });
         });
+
+        
+        const loginUser = async (username, password) => {
+            try {
+            const response = await fetch("http://localhost/ReservENSAM/server/api/login.php", {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password }),
+            });
+        
+            const data = await response.json();
+        
+            if (response.ok) {
+                console.log("Login successful:", data);
+            } else {
+                console.error("Login failed:", data);
+            }
+            } catch (error) {
+            console.error("Error:", error);
+            }
+        };
+        
+        // Example usage
+        loginUser("exampleUsername", "examplePassword");
+  
     </script>
 </body>
 </html>
