@@ -39,7 +39,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         dateFormat: "Y-m-d",
         minDate: "today",
         onChange: dates => {
-            selectedDates = dates.map(date => date.toISOString().split('T')[0]);
+            selectedDates = dates.map(date => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            });
         }
     });
 
@@ -122,14 +127,23 @@ function displayReservations(reservations) {
     }
 
     container.innerHTML = filteredReservations.map(reservation => `
-        <div class="reservation-item">
+        <div class="reservation-item" data-id="${reservation.id}">
             <div class="reservation-details">
-                <p><strong>Club:</strong> ${reservation.club_name}</p>
-                <p><strong>Date:</strong> ${reservation.start_date}</p>
-                <p><strong>Heure:</strong> ${reservation.start_time} - ${reservation.end_time}</p>
+                ${currentUser.role !== 'CLUB' ? `<p><strong>Club:</strong> ${reservation.club_name}</p>` : ''}
+                <p><strong>Objet de l'événement:</strong> ${reservation.activity_description}</p>
+                <p><strong>Type d'événement:</strong> ${reservation.event_type}</p>
+                <p><strong>Date de réservation:</strong> ${reservation.start_date.split(' ')[0]}</p>
+                <p><strong>Heures:</strong> ${reservation.start_time.slice(0, 5)} à ${reservation.end_time.slice(0, 5)}</p>
+                <p><strong>Salle:</strong> ${reservation.room_name}</p>
                 <p><strong>Status:</strong> <span class="status ${reservation.status.toLowerCase()}">${reservation.status}</span></p>
             </div>
-            ${currentUser.role !== 'CLUB' ? `
+            ${currentUser.role === 'CLUB' ? `
+                <div class="reservation-actions">
+                    <button onclick="cancelReservation(this)" class="action-button cancel-button">
+                        Annuler
+                    </button>
+                </div>
+            ` : `
                 <div class="reservation-actions">
                     <button onclick="approveReservation(this)" class="action-button accept-button">
                         Approuver
@@ -138,7 +152,7 @@ function displayReservations(reservations) {
                         Rejeter
                     </button>
                 </div>
-            ` : ''}
+            `}
         </div>
     `).join('');
 }
@@ -147,9 +161,12 @@ function createReservationHTML(reservation, role) {
     return `
         <div class="reservation-item" data-id="${reservation.id}">
             <div class="reservation-details">
-                <p><strong>Date:</strong> ${reservation.date}</p>
-                <p><strong>Heure:</strong> ${reservation.time}</p>
-                <p><strong>Salle:</strong> ${reservation.room}</p>
+                ${role !== 'CLUB' ? `<p><strong>Club:</strong> ${reservation.club_name}</p>` : ''}
+                <p><strong>Objet de l'événement:</strong> ${reservation.activity_description}</p>
+                <p><strong>Type d'événement:</strong> ${reservation.event_type}</p>
+                <p><strong>Date de réservation:</strong> ${reservation.start_date.split(' ')[0]}</p>
+                <p><strong>Heures:</strong> ${reservation.start_time.slice(0, 5)} à ${reservation.end_time.slice(0, 5)}</p>
+                <p><strong>Salle:</strong> ${reservation.room_name}</p>
                 <p><strong>Status:</strong> ${reservation.status}</p>
             </div>
             <div class="reservation-actions">
@@ -170,6 +187,7 @@ function submitReservation() {
     const startTime = document.getElementById('start-time').value;
     const endTime = document.getElementById('end-time').value;
     const room = document.getElementById('room').value;
+    const eventType = document.getElementById('type').value; // Add this line
 
     if (!activityDescription || !internalAttendees || !externalAttendees || selectedDates.length === 0 || !startTime || !endTime || !room) {
         alert('Veuillez remplir tous les champs obligatoires.');
@@ -179,8 +197,7 @@ function submitReservation() {
     const reservationData = {
         club_id: currentUser.user_id,
         activity_description: activityDescription,
-        event_type: document.getElementById
-    ('type').value,
+        event_type: eventType, // Add this line
         internal_attendees: internalAttendees,
         external_attendees: externalAttendees,
         dates: selectedDates,
@@ -189,6 +206,8 @@ function submitReservation() {
         room: parseInt(document.getElementById('room').value, 10),
         required_equipment: {
             tables: document.getElementById('tables').value,
+            chaises: document.getElementById('chaises').value, // Add this line
+            sonorisation: document.getElementById('sonorisation').value, // Add this line
             videoprojecteurs: document.getElementById('videoprojecteurs').value,
             autres: document.getElementById('autres').value
         }
@@ -209,6 +228,32 @@ function submitReservation() {
             loadReservations();
         } else {
             alert('Failed to submit reservation');
+        }
+    });
+}
+
+function cancelReservation(button) {
+    const reservationItem = button.closest('.reservation-item');
+    const reservationId = reservationItem.dataset.id;
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+    fetch('http://localhost/ReservENSAM/server/api/cancel_reservation.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+            id: reservationId,
+            user_id: currentUser.id
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            reservationItem.remove();
+        } else {
+            alert('Failed to cancel reservation');
         }
     });
 }

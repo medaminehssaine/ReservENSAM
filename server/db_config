@@ -70,6 +70,7 @@ CREATE TABLE RESERVATION (
     required_equipment TEXT,
     internal_attendees INT,
     external_attendees INT,
+    event_type VARCHAR(255) NOT NULL, -- Added column
     status ENUM('PENDING_ADEAM', 'PENDING_ADMIN', 'APPROVED', 'REJECTED') DEFAULT 'PENDING_ADEAM',
     rejection_reason TEXT,
     adeam_approved_by INT,

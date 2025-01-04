@@ -29,10 +29,10 @@ foreach ($dates as $date) {
     $startDate = $date . ' ' . $startTime;
     $endDate = $date . ' ' . $endTime;
 
-    $sql = "INSERT INTO RESERVATION (club_id, room_id, start_date, end_date, start_time, end_time, activity_description, required_equipment, internal_attendees, external_attendees, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING_ADEAM')";
+    $sql = "INSERT INTO RESERVATION (club_id, room_id, start_date, end_date, start_time, end_time, activity_description, event_type, required_equipment, internal_attendees, external_attendees, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING_ADEAM')";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iissssssis", $clubId, $room, $startDate, $endDate, $startTime, $endTime, $activityDescription, $requiredEquipment, $internalAttendees, $externalAttendees);
+    $stmt->bind_param("iisssssssis", $clubId, $room, $startDate, $endDate, $startTime, $endTime, $activityDescription, $eventType, $requiredEquipment, $internalAttendees, $externalAttendees);
     $stmt->execute();
 }
 
