@@ -100,56 +100,6 @@ button:hover {
   display: none !important;
 }
 
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-}
-
-.modal.active {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-content {
-  background: var(--bg-secondary);
-  padding: 2rem;
-  border-radius: 12px;
-  position: relative;
-  width: 90%;
-  max-width: 600px;
-}
-
-.modal-close {
-  position: absolute;
-  right: 1.5rem;
-  top: 1.5rem;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--text-primary);
-}
-
-.modal-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  justify-content: flex-end;
-}
-
-.rejection-form {
-  margin-top: 1rem;
-}
-
-.rejection-form textarea {
-  width: 100%;
-  margin-bottom: 1rem;
-  min-height: 100px;
-}
-
 .action-button {
   padding: 0.8rem 1.5rem;
   border-radius: 6px;
@@ -181,12 +131,6 @@ button:hover {
 
 /* Responsive styles */
 @media (max-width: 768px) {
-  .modal-content {
-    width: 95%;
-    margin: 10px;
-    padding: 15px;
-  }
-
   .action-button {
     width: 100%;
   }
