@@ -40,61 +40,98 @@ document.addEventListener('DOMContentLoaded', async () => {
             selectedDates = dates.map(date => date.toISOString().split('T')[0]);
         }
     });
+
+    loadReservations();
 });
 
-async function approveReservation(reservationId, role) {
+async function approveReservation(id) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     try {
-        const response = await fetch(`http://localhost/ReservENSAM/server/api/approve_reservation.php`, {
+        const response = await fetch('http://localhost/ReservENSAM/server/api/approve_reservation.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}`
             },
             body: JSON.stringify({
-                reservationId,
-                role,
-                token: JSON.parse(localStorage.getItem('currentUser')).token
+                reservationId: id,
+                role: currentUser.role
             })
         });
-
-        const data = await response.json();
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message);
+        
+        if (response.ok) {
+            loadReservations();
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while approving the reservation.');
     }
 }
 
-async function rejectReservation(reservationId, role) {
-    const reason = prompt('Please enter rejection reason:');
+async function rejectReservation(id) {
+    const reason = prompt('Raison du rejet:');
     if (!reason) return;
 
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     try {
-        const response = await fetch(`http://localhost/ReservENSAM/server/api/reject_reservation.php`, {
+        const response = await fetch('http://localhost/ReservENSAM/server/api/reject_reservation.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}`
             },
             body: JSON.stringify({
-                reservationId,
-                role,
-                reason,
-                token: JSON.parse(localStorage.getItem('currentUser')).token
+                reservationId: id,
+                role: currentUser.role,
+                reason: reason
             })
         });
-
-        const data = await response.json();
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message);
+        
+        if (response.ok) {
+            loadReservations();
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while rejecting the reservation.');
+    }
+}
+
+async function loadReservations() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    try {
+        const response = await fetch('http://localhost/ReservENSAM/server/api/get_reservations.php', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${currentUser.token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const reservations = await response.json();
+        
+        const container = document.getElementById(
+            currentUser.role === 'ADEAM' ? 'adeamReservations' : 
+            currentUser.role === 'ADMIN' ? 'adminReservations' : 
+            'clubReservations'
+        );
+
+        container.innerHTML = reservations.map(reservation => `
+            <div class="reservation-item">
+                <div class="reservation-details">
+                    <p><strong>Date:</strong> ${reservation.start_date}</p>
+                    <p><strong>Heure:</strong> ${reservation.start_time} - ${reservation.end_time}</p>
+                    <p><strong>Salle:</strong> ${reservation.room_id}</p>
+                    <p><strong>Status:</strong> <span class="status ${reservation.status.toLowerCase()}">${reservation.status}</span></p>
+                </div>
+                ${currentUser.role !== 'CLUB' ? `
+                    <div class="reservation-actions">
+                        <button onclick="approveReservation(${reservation.id})" class="action-button accept-button">Approuver</button>
+                        <button onclick="rejectReservation(${reservation.id})" class="action-button reject-button">Rejeter</button>
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading reservations:', error);
     }
 }
 

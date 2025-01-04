@@ -101,32 +101,29 @@ button:hover {
 }
 
 .action-button {
-  padding: 0.5rem 1rem;
+  padding: 8px 16px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
   transition: opacity 0.2s;
-}
-
-.action-button:hover {
-  opacity: 0.9;
+  width: auto;
 }
 
 .accept-button {
-  background-color: #16a34a;
+  background-color: #22c55e;
   color: white;
 }
 
 .reject-button {
-  background-color: var(--danger);
+  background-color: #ef4444;
   color: white;
 }
 
 .reservation-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: 10px;
+  margin-top: 10px;
   justify-content: flex-end;
 }
 
@@ -143,16 +140,29 @@ button:hover {
 }
 
 .reservation-item {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
   background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .reservation-details {
   margin-bottom: 1rem;
 }
+
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+}
+
+.status.pending_adeam { background-color: #f59e0b; }
+.status.pending_admin { background-color: #3b82f6; }
+.status.approved { background-color: #22c55e; }
+.status.rejected { background-color: #ef4444; }
 
 /* Responsive styles */
 @media (max-width: 768px) {

@@ -1,49 +1,49 @@
 <?php
 header('Content-Type: application/json');
 
-$data = json_decode(file_get_contents('php://input'), true);
+include_once 'db_connect.php';
 
-$username = $data['username'];
-$password = $data['password'];
+// Get token from Authorization header
+$headers = getallheaders();
+$token = str_replace('Bearer ', '', $headers['Authorization'] ?? '');
 
-$servername = "localhost";
-$dbname = "reserv_ensam";
-$dbusername = "root";
-$dbpassword = "";
-
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
-
-if ($conn->connect_error) {
-    die(json_encode(['error' => 'Connection failed: ' . $conn->connect_error]));
-}
-
-$sql = "SELECT * FROM USER WHERE username = ?";
+// Verify token and get user role
+$sql = "SELECT u.role, u.id FROM TOKENS t 
+        JOIN USER u ON t.user_id = u.id 
+        WHERE t.token = ? AND t.expires_at > NOW()";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $username);
+$stmt->bind_param("s", $token);
 $stmt->execute();
 $result = $stmt->get_result();
 
-if ($result->num_rows > 0) {
-    $user = $result->fetch_assoc();
-    if ($password === $user['password']) {
-        // Generate token
-        $token = bin2hex(random_bytes(16));
-        $expires_at = date('Y-m-d H:i:s', strtotime('+1 month'));
-
-        // Store token in database
-        $sql = "INSERT INTO TOKENS (user_id, token, expires_at) VALUES (?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iss", $user['id'], $token, $expires_at);
-        $stmt->execute();
-
-        echo json_encode(['success' => true, 'token' => $token, 'role' => $user['role']]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Invalid password']);
-    }
-} else {
-    echo json_encode(['success' => false, 'message' => 'User not found']);
+if ($result->num_rows === 0) {
+    echo json_encode(['error' => 'Invalid token']);
+    exit;
 }
 
-$stmt->close();
+$user = $result->fetch_assoc();
+
+// Get reservations based on role
+switch($user['role']) {
+    case 'CLUB':
+        $sql = "SELECT * FROM RESERVATION WHERE club_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user['id']);
+        break;
+    case 'ADEAM':
+        $sql = "SELECT * FROM RESERVATION WHERE status = 'PENDING_ADEAM'";
+        $stmt = $conn->prepare($sql);
+        break;
+    case 'ADMIN':
+        $sql = "SELECT * FROM RESERVATION WHERE status = 'PENDING_ADMIN'";
+        $stmt = $conn->prepare($sql);
+        break;
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+$reservations = $result->fetch_all(MYSQLI_ASSOC);
+
+echo json_encode($reservations);
 $conn->close();
 ?>
