@@ -109,3 +109,10 @@ SELECT id FROM USER WHERE username = 'adeam1';
 
 INSERT INTO ADMIN (user_id)
 SELECT id FROM USER WHERE username = 'admin1';
+
+-- Insert rooms
+INSERT INTO ROOM (name, department) VALUES
+('CC 13', 'Dép Math-Info'),
+('CC 14', 'Dép Math-Info'),
+('Salle 1', 'Dép Énerg'),
+('Salle 2', 'Dép Énerg');

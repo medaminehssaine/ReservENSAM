@@ -36,7 +36,7 @@ if ($result->num_rows > 0) {
         $stmt->bind_param("iss", $user['id'], $token, $expires_at);
         $stmt->execute();
 
-        echo json_encode(['success' => true, 'token' => $token, 'role' => $user['role']]);
+        echo json_encode(['success' => true, 'token' => $token, 'role' => $user['role'], 'user_id' => $user['id']]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Invalid password']);
     }

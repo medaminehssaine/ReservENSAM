@@ -115,7 +115,13 @@ function displayReservations(reservations) {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const container = document.getElementById(`${currentUser.role.toLowerCase()}Reservations`);
     
-    container.innerHTML = reservations.map(reservation => `
+    let filteredReservations = reservations;
+    if (currentUser.role === 'CLUB') {
+        filteredReservations = reservations.filter(reservation => parseInt(reservation.club_id) === currentUser.user_id);
+        filteredReservations.reverse();
+    }
+
+    container.innerHTML = filteredReservations.map(reservation => `
         <div class="reservation-item">
             <div class="reservation-details">
                 <p><strong>Club:</strong> ${reservation.club_name}</p>
@@ -158,16 +164,29 @@ function createReservationHTML(reservation, role) {
 
 function submitReservation() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const activityDescription = document.getElementById('objet').value;
+    const internalAttendees = document.getElementById('participants-internes').value;
+    const externalAttendees = document.getElementById('participants-externes').value;
+    const startTime = document.getElementById('start-time').value;
+    const endTime = document.getElementById('end-time').value;
+    const room = document.getElementById('room').value;
+
+    if (!activityDescription || !internalAttendees || !externalAttendees || selectedDates.length === 0 || !startTime || !endTime || !room) {
+        alert('Veuillez remplir tous les champs obligatoires.');
+        return;
+    }
+
     const reservationData = {
-        club_id: currentUser.id,
-        activity_description: document.getElementById('objet').value,
-        event_type: document.getElementById('type').value,
-        internal_attendees: document.getElementById('participants-internes').value,
-        external_attendees: document.getElementById('participants-externes').value,
+        club_id: currentUser.user_id,
+        activity_description: activityDescription,
+        event_type: document.getElementById
+    ('type').value,
+        internal_attendees: internalAttendees,
+        external_attendees: externalAttendees,
         dates: selectedDates,
-        start_time: document.getElementById('start-time').value,
-        end_time: document.getElementById('end-time').value,
-        room: document.getElementById('room').value,
+        start_time: startTime,
+        end_time: endTime,
+        room: parseInt(document.getElementById('room').value, 10),
         required_equipment: {
             tables: document.getElementById('tables').value,
             videoprojecteurs: document.getElementById('videoprojecteurs').value,

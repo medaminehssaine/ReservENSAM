@@ -14,7 +14,7 @@ async function login() {
       const data = await response.json();
 
       if (data.success) {
-          const currentUser = { username, role: data.role, token: data.token };
+          const currentUser = { username, role: data.role, token: data.token, user_id: data.user_id };
           localStorage.setItem('currentUser', JSON.stringify(currentUser));
           window.location.href = 'home.html';
       } else {

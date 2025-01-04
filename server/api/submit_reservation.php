@@ -1,4 +1,3 @@
-
 <?php
 header('Content-Type: application/json');
 
@@ -12,7 +11,7 @@ $externalAttendees = $data['external_attendees'];
 $dates = $data['dates'];
 $startTime = $data['start_time'];
 $endTime = $data['end_time'];
-$room = $data['room'];
+$room = (int)$data['room']; // Ensure room is an integer
 $requiredEquipment = json_encode($data['required_equipment']);
 
 $servername = "localhost";
