@@ -1,14 +1,28 @@
-function login() {
+async function login() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
-  const users = JSON.parse(localStorage.getItem('users'));
 
-  if (users[username] && users[username].password === password) {
-      const currentUser = { username, role: users[username].role };
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-      window.location.href = 'home.html';
-  } else {
-      alert('Invalid credentials');
+  try {
+      const response = await fetch("http://localhost/ReservENSAM/server/api/login.php", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+          const currentUser = { username, role: data.role, token: data.token };
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+          window.location.href = 'home.html';
+      } else {
+          alert(data.message);
+      }
+  } catch (error) {
+      console.error("Error:", error);
+      alert('An error occurred while logging in.');
   }
 }
 
@@ -16,4 +30,4 @@ document.addEventListener('keydown', function(event) {
   if (event.key === 'Enter') {
       login();
   }
-});;
+});
