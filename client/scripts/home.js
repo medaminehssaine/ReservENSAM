@@ -20,6 +20,8 @@ const STATUS_CLASSES = {
     [STATUS.REJECTED]: 'status-rejected'
 };
 
+let selectedDates = []; // Define selectedDates at the top
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Retrieve current user
     const currentUser = await checkAuth();
@@ -47,14 +49,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 function approveReservation(button) {
     const reservationItem = button.closest('.reservation-item');
     const reservationId = reservationItem.dataset.id;
-    
-    fetch('/api/approve_reservation.php', {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+    fetch('http://localhost/ReservENSAM/server/api/approve_reservation.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ id: reservationId })
+        body: JSON.stringify({ 
+            id: reservationId,
+            user_id: currentUser.id,
+            user_role: currentUser.role
+        })
     })
     .then(response => response.json())
     .then(data => {
@@ -67,11 +74,12 @@ function approveReservation(button) {
 function rejectReservation(button) {
     const reservationItem = button.closest('.reservation-item');
     const reservationId = reservationItem.dataset.id;
-    
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
     const reason = prompt('Raison du rejet:');
     if (!reason) return;
 
-    fetch('/api/reject_reservation.php', {
+    fetch('http://localhost/ReservENSAM/server/api/reject_reservation.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -79,7 +87,9 @@ function rejectReservation(button) {
         },
         body: JSON.stringify({ 
             id: reservationId,
-            reason: reason 
+            reason: reason,
+            user_id: currentUser.id,
+            user_role: currentUser.role
         })
     })
     .then(response => response.json())
@@ -146,9 +156,40 @@ function createReservationHTML(reservation, role) {
     `;
 }
 
-function displayReservations(reservations, containerId, role) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = reservations.map(reservation => 
-        createReservationHTML(reservation, role)
-    ).join('');
+function submitReservation() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const reservationData = {
+        club_id: currentUser.id,
+        activity_description: document.getElementById('objet').value,
+        event_type: document.getElementById('type').value,
+        internal_attendees: document.getElementById('participants-internes').value,
+        external_attendees: document.getElementById('participants-externes').value,
+        dates: selectedDates,
+        start_time: document.getElementById('start-time').value,
+        end_time: document.getElementById('end-time').value,
+        room: document.getElementById('room').value,
+        required_equipment: {
+            tables: document.getElementById('tables').value,
+            videoprojecteurs: document.getElementById('videoprojecteurs').value,
+            autres: document.getElementById('autres').value
+        }
+    };
+
+    fetch('http://localhost/ReservENSAM/server/api/submit_reservation.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(reservationData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Reservation submitted successfully');
+            loadReservations();
+        } else {
+            alert('Failed to submit reservation');
+        }
+    });
 }
