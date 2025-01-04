@@ -91,3 +91,20 @@ CREATE TABLE TOKENS (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES USER(id) ON DELETE CASCADE
 );
+
+-- Insert test users
+INSERT INTO USER (username, password, email, role) VALUES
+('club1', 'club123', 'club1@test.com', 'CLUB'),
+('adeam1', 'adeam123', 'adeam1@test.com', 'ADEAM'),
+('admin1', 'admin123', 'admin1@test.com', 'ADMIN');
+
+-- Link users to their respective roles
+INSERT INTO CLUB (user_id, club_name, president_name, contact_info)
+SELECT id, 'Test Club', 'Club President', '123456789'
+FROM USER WHERE username = 'club1';
+
+INSERT INTO ADEAM (user_id)
+SELECT id FROM USER WHERE username = 'adeam1';
+
+INSERT INTO ADMIN (user_id)
+SELECT id FROM USER WHERE username = 'admin1';
