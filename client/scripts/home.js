@@ -64,7 +64,7 @@ function approveReservation(button) {
         },
         body: JSON.stringify({ 
             id: reservationId,
-            user_id: currentUser.id,
+            user_id: currentUser.user_id,
             user_role: currentUser.role
         })
     })
@@ -72,6 +72,8 @@ function approveReservation(button) {
     .then(data => {
         if (data.success) {
             reservationItem.remove();
+        } else {
+            alert(data.message);
         }
     });
 }
@@ -93,7 +95,7 @@ function rejectReservation(button) {
         body: JSON.stringify({ 
             id: reservationId,
             reason: reason,
-            user_id: currentUser.id,
+            user_id: currentUser.user_id,
             user_role: currentUser.role
         })
     })
@@ -124,6 +126,10 @@ function displayReservations(reservations) {
     if (currentUser.role === 'CLUB') {
         filteredReservations = reservations.filter(reservation => parseInt(reservation.club_id) === currentUser.user_id);
         filteredReservations.reverse();
+    } else if (currentUser.role === 'ADEAM') {
+        filteredReservations = reservations.filter(reservation => reservation.status === 'PENDING_ADEAM');
+    } else if (currentUser.role === 'ADMIN') {
+        filteredReservations = reservations.filter(reservation => reservation.status === 'PENDING_ADMIN');
     }
 
     container.innerHTML = filteredReservations.map(reservation => {
@@ -142,13 +148,13 @@ function displayReservations(reservations) {
                     <p><strong>Équipements requis:</strong> Tables: ${equipment.tables}, Chaises: ${equipment.chaises}, Sonorisation: ${equipment.sonorisation}, Vidéoprojecteurs: ${equipment.videoprojecteurs}, Autres: ${equipment.autres}</p>
                     <p><strong>Status:</strong> <span class="status ${reservation.status.toLowerCase()}">${reservation.status}</span></p>
                 </div>
-                ${currentUser.role === 'CLUB' ? `
+                ${currentUser.role === 'CLUB' && reservation.status !== 'REJECTED' ? `
                     <div class="reservation-actions">
                         <button onclick="cancelReservation(this)" class="action-button cancel-button">
                             Annuler
                         </button>
                     </div>
-                ` : `
+                ` : currentUser.role !== 'CLUB' ? `
                     <div class="reservation-actions">
                         <button onclick="approveReservation(this)" class="action-button accept-button">
                             Approuver
@@ -157,36 +163,10 @@ function displayReservations(reservations) {
                             Rejeter
                         </button>
                     </div>
-                `}
+                ` : ''}
             </div>
         `;
     }).join('');
-}
-
-function createReservationHTML(reservation, role) {
-    const equipment = JSON.parse(reservation.required_equipment);
-    return `
-        <div class="reservation-item" data-id="${reservation.id}">
-            <div class="reservation-details">
-                ${role !== 'CLUB' ? `<p><strong>Club:</strong> ${reservation.club_name}</p>` : ''}
-                <p><strong>Objet de l'événement:</strong> ${reservation.activity_description}</p>
-                <p><strong>Type d'événement:</strong> ${reservation.event_type}</p>
-                <p><strong>Date de réservation:</strong> ${reservation.start_date.split(' ')[0]}</p>
-                <p><strong>Heures:</strong> ${reservation.start_time.slice(0, 5)} à ${reservation.end_time.slice(0, 5)}</p>
-                <p><strong>Salle:</strong> ${reservation.room_name}</p>
-                <p><strong>Participants internes:</strong> ${reservation.internal_attendees}</p>
-                <p><strong>Participants externes:</strong> ${reservation.external_attendees}</p>
-                <p><strong>Équipements requis:</strong> Tables: ${equipment.tables}, Chaises: ${equipment.chaises}, Sonorisation: ${equipment.sonorisation}, Vidéoprojecteurs: ${equipment.videoprojecteurs}, Autres: ${equipment.autres}</p>
-                <p><strong>Status:</strong> ${reservation.status}</p>
-            </div>
-            <div class="reservation-actions">
-                <button onclick="approveReservation(this)" 
-                        class="action-button accept-button">Approuver</button>
-                <button onclick="rejectReservation(this)" 
-                        class="action-button reject-button">Rejeter</button>
-            </div>
-        </div>
-    `;
 }
 
 function submitReservation() {

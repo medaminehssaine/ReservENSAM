@@ -29,6 +29,20 @@ foreach ($dates as $date) {
     $startDate = $date . ' ' . $startTime;
     $endDate = $date . ' ' . $endTime;
 
+    // Check room availability
+    $availabilitySql = "SELECT * FROM ROOM_UNAVAILABILITY WHERE room_id = ? AND ((start_date <= ? AND end_date >= ?) OR (start_date <= ? AND end_date >= ?))";
+    $availabilityStmt = $conn->prepare($availabilitySql);
+    $availabilityStmt->bind_param("issss", $room, $startDate, $startDate, $endDate, $endDate);
+    $availabilityStmt->execute();
+    $availabilityResult = $availabilityStmt->get_result();
+
+    if ($availabilityResult->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'Room is unavailable for the selected time interval']);
+        $availabilityStmt->close();
+        $conn->close();
+        exit;
+    }
+
     $sql = "INSERT INTO RESERVATION (club_id, room_id, start_date, end_date, start_time, end_time, activity_description, event_type, required_equipment, internal_attendees, external_attendees, status) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING_ADEAM')";
     $stmt = $conn->prepare($sql);
