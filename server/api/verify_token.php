@@ -2,38 +2,33 @@
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents('php://input'), true);
-$reservationId = $data['reservationId'];
-$role = $data['role'];
-$reason = $data['reason'];
+
 $token = $data['token'];
 
-include_once 'db_connect.php';
+$servername = "localhost";
+$dbname = "reserv_ensam";
+$dbusername = "root";
+$dbpassword = "";
 
-// Verify token and role
-$tokenSql = "SELECT u.role, u.id FROM TOKENS t JOIN USER u ON t.user_id = u.id WHERE t.token = ? AND t.expires_at > NOW()";
-$stmt = $conn->prepare($tokenSql);
+$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
+
+if ($conn->connect_error) {
+    die(json_encode(['error' => 'Connection failed: ' . $conn->connect_error]));
+}
+
+$sql = "SELECT t.*, u.role FROM TOKENS t JOIN USER u ON t.user_id = u.id WHERE t.token = ? AND t.expires_at > NOW()";
+$stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $token);
 $stmt->execute();
 $result = $stmt->get_result();
 
-if ($result->num_rows === 0) {
-    echo json_encode(['success' => false, 'message' => 'Invalid token']);
-    exit;
+if ($result->num_rows > 0) {
+    $tokenData = $result->fetch_assoc();
+    echo json_encode(['success' => true, 'role' => $tokenData['role']]);
+} else {
+    echo json_encode(['success' => false, 'message' => 'Invalid or expired token']);
 }
 
-$userData = $result->fetch_assoc();
-if ($userData['role'] !== $role) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit;
-}
-
-// Update reservation status
-$status = 'REJECTED';
-$sql = "UPDATE RESERVATION SET status = ?, rejection_reason = ? WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("ssi", $status, $reason, $reservationId);
-$success = $stmt->execute();
-
-echo json_encode(['success' => $success]);
+$stmt->close();
 $conn->close();
 ?>
