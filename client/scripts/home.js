@@ -44,40 +44,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadReservations();
 });
 
-async function approveReservation(id) {
-    const response = await fetch('http://localhost/ReservENSAM/server/api/approve_reservation.php', {
+function approveReservation(button) {
+    const reservationItem = button.closest('.reservation-item');
+    const reservationId = reservationItem.dataset.id;
+    
+    fetch('/api/approve_reservation.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ reservationId: id })
+        body: JSON.stringify({ id: reservationId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            reservationItem.remove();
+        }
     });
-    
-    if (response.ok) {
-        loadReservations();
-    }
 }
 
-async function rejectReservation(id) {
+function rejectReservation(button) {
+    const reservationItem = button.closest('.reservation-item');
+    const reservationId = reservationItem.dataset.id;
+    
     const reason = prompt('Raison du rejet:');
     if (!reason) return;
 
-    const response = await fetch('http://localhost/ReservENSAM/server/api/reject_reservation.php', {
+    fetch('/api/reject_reservation.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ 
-            reservationId: id,
+            id: reservationId,
             reason: reason 
         })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            reservationItem.remove();
+        }
     });
-    
-    if (response.ok) {
-        loadReservations();
-    }
 }
 
 async function loadReservations() {
@@ -105,10 +115,10 @@ function displayReservations(reservations) {
             </div>
             ${currentUser.role !== 'CLUB' ? `
                 <div class="reservation-actions">
-                    <button onclick="approveReservation(${reservation.id})" class="action-button accept-button">
+                    <button onclick="approveReservation(this)" class="action-button accept-button">
                         Approuver
                     </button>
-                    <button onclick="rejectReservation(${reservation.id})" class="action-button reject-button">
+                    <button onclick="rejectReservation(this)" class="action-button reject-button">
                         Rejeter
                     </button>
                 </div>
@@ -127,9 +137,9 @@ function createReservationHTML(reservation, role) {
                 <p><strong>Status:</strong> ${reservation.status}</p>
             </div>
             <div class="reservation-actions">
-                <button onclick="approveReservation(${reservation.id}, '${role}')" 
+                <button onclick="approveReservation(this)" 
                         class="action-button accept-button">Approuver</button>
-                <button onclick="rejectReservation(${reservation.id}, '${role}')" 
+                <button onclick="rejectReservation(this)" 
                         class="action-button reject-button">Rejeter</button>
             </div>
         </div>

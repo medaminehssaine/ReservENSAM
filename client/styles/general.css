@@ -101,11 +101,12 @@ button:hover {
 }
 
 .action-button {
-  padding: 8px 16px;
+  padding: 10px 20px;
+  margin: 5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: bold;
   transition: opacity 0.2s;
   width: auto;
   transition: transform 0.2s;
@@ -116,20 +117,20 @@ button:hover {
 }
 
 .accept-button {
-  background-color: #22c55e;
+  background-color: #4CAF50;
   color: white;
 }
 
 .reject-button {
-  background-color: #ef4444;
+  background-color: #f44336;
   color: white;
 }
 
 .reservation-actions {
   display: flex;
   gap: 10px;
-  margin-top: 10px;
   justify-content: flex-end;
+  margin-top: 10px;
 }
 
 .status-pending {

@@ -12,7 +12,7 @@
 </head>
 <body>
     <nav>
-        <h1>ReservENSAM</h1>
+        <h1>wahassan</h1>
         <div class="nav-right">
             <button onclick="logout()" class="logout-btn">Déconnexion</button>
         </div>
@@ -80,14 +80,7 @@
                         <input id="tables" name="tables" type="number" min="0" step="1" value="0">
                     </div>
                     <div class="form-group">
-                        <label class="equipment-label" for="chaises">Chaises</label>
-                        <input id="chaises" name="chaises" type="number" min="0" step="1" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label class="equipment-label" for="sonorisation">Sonorisation</label>
-                        <input id="sonorisation" name="sonorisation" type="number" min="0" step="1" value="0">
-                    </div>
-                    <div class="form-group">
+                        <label="form-group">
                         <label class="equipment-label" for="videoprojecteurs">Vidéoprojecteurs</label>
                         <input id="videoprojecteurs" name="videoprojecteurs" type="number" min="0" step="1" value="0">
                     </div>
@@ -110,7 +103,18 @@
         <div id="adeamDashboard" class="hidden">
             <div class="view-reservations">
                 <h2 class="dashboard-title">Demandes en Attente d'Approbation</h2>
-                <div id="adeamReservations" class="reservations-scroll"></div>
+                <div id="adeamReservations" class="reservations-scroll">
+                    <!-- Direct Button Implementation -->
+                    <div class="reservation-item">
+                        <div class="reservation-info">
+                            <!-- Reservation details here -->
+                        </div>
+                        <div class="reservation-actions">
+                            <button onclick="approveReservation(this)" class="action-button accept-button">Approuver</button>
+                            <button onclick="rejectReservation(this)" class="action-button reject-button">Rejeter</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
