@@ -108,6 +108,11 @@ button:hover {
   font-weight: 600;
   transition: opacity 0.2s;
   width: auto;
+  transition: transform 0.2s;
+}
+
+.action-button:hover {
+  transform: scale(1.05);
 }
 
 .accept-button {
@@ -145,6 +150,7 @@ button:hover {
   border-radius: 8px;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  animation: slideIn 0.3s ease-out;
 }
 
 .reservation-details {
@@ -163,6 +169,28 @@ button:hover {
 .status.pending_admin { background-color: #3b82f6; }
 .status.approved { background-color: #22c55e; }
 .status.rejected { background-color: #ef4444; }
+
+.error-message {
+  animation: shake 0.5s ease-in-out;
+  color: var(--danger);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
 
 /* Responsive styles */
 @media (max-width: 768px) {

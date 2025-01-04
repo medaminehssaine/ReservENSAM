@@ -45,25 +45,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function approveReservation(id) {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    try {
-        const response = await fetch('http://localhost/ReservENSAM/server/api/approve_reservation.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentUser.token}`
-            },
-            body: JSON.stringify({
-                reservationId: id,
-                role: currentUser.role
-            })
-        });
-        
-        if (response.ok) {
-            loadReservations();
-        }
-    } catch (error) {
-        console.error('Error:', error);
+    const response = await fetch('http://localhost/ReservENSAM/server/api/approve_reservation.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ reservationId: id })
+    });
+    
+    if (response.ok) {
+        loadReservations();
     }
 }
 
@@ -71,68 +63,58 @@ async function rejectReservation(id) {
     const reason = prompt('Raison du rejet:');
     if (!reason) return;
 
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    try {
-        const response = await fetch('http://localhost/ReservENSAM/server/api/reject_reservation.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentUser.token}`
-            },
-            body: JSON.stringify({
-                reservationId: id,
-                role: currentUser.role,
-                reason: reason
-            })
-        });
-        
-        if (response.ok) {
-            loadReservations();
-        }
-    } catch (error) {
-        console.error('Error:', error);
+    const response = await fetch('http://localhost/ReservENSAM/server/api/reject_reservation.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+            reservationId: id,
+            reason: reason 
+        })
+    });
+    
+    if (response.ok) {
+        loadReservations();
     }
 }
 
 async function loadReservations() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const response = await fetch('http://localhost/ReservENSAM/server/api/get_reservations.php', {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
     
-    try {
-        const response = await fetch('http://localhost/ReservENSAM/server/api/get_reservations.php', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${currentUser.token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        const reservations = await response.json();
-        
-        const container = document.getElementById(
-            currentUser.role === 'ADEAM' ? 'adeamReservations' : 
-            currentUser.role === 'ADMIN' ? 'adminReservations' : 
-            'clubReservations'
-        );
+    const reservations = await response.json();
+    displayReservations(reservations);
+}
 
-        container.innerHTML = reservations.map(reservation => `
-            <div class="reservation-item">
-                <div class="reservation-details">
-                    <p><strong>Date:</strong> ${reservation.start_date}</p>
-                    <p><strong>Heure:</strong> ${reservation.start_time} - ${reservation.end_time}</p>
-                    <p><strong>Salle:</strong> ${reservation.room_id}</p>
-                    <p><strong>Status:</strong> <span class="status ${reservation.status.toLowerCase()}">${reservation.status}</span></p>
-                </div>
-                ${currentUser.role !== 'CLUB' ? `
-                    <div class="reservation-actions">
-                        <button onclick="approveReservation(${reservation.id})" class="action-button accept-button">Approuver</button>
-                        <button onclick="rejectReservation(${reservation.id})" class="action-button reject-button">Rejeter</button>
-                    </div>
-                ` : ''}
+function displayReservations(reservations) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const container = document.getElementById(`${currentUser.role.toLowerCase()}Reservations`);
+    
+    container.innerHTML = reservations.map(reservation => `
+        <div class="reservation-item">
+            <div class="reservation-details">
+                <p><strong>Club:</strong> ${reservation.club_name}</p>
+                <p><strong>Date:</strong> ${reservation.start_date}</p>
+                <p><strong>Heure:</strong> ${reservation.start_time} - ${reservation.end_time}</p>
+                <p><strong>Status:</strong> <span class="status ${reservation.status.toLowerCase()}">${reservation.status}</span></p>
             </div>
-        `).join('');
-    } catch (error) {
-        console.error('Error loading reservations:', error);
-    }
+            ${currentUser.role !== 'CLUB' ? `
+                <div class="reservation-actions">
+                    <button onclick="approveReservation(${reservation.id})" class="action-button accept-button">
+                        Approuver
+                    </button>
+                    <button onclick="rejectReservation(${reservation.id})" class="action-button reject-button">
+                        Rejeter
+                    </button>
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
 }
 
 function createReservationHTML(reservation, role) {

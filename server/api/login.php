@@ -26,23 +26,31 @@ $user = $result->fetch_assoc();
 // Get reservations based on role
 switch($user['role']) {
     case 'CLUB':
-        $sql = "SELECT * FROM RESERVATION WHERE club_id = ?";
+        $sql = "SELECT r.*, u.username as club_name 
+                FROM RESERVATION r 
+                JOIN USER u ON r.club_id = u.id 
+                WHERE r.club_id = ? AND r.deleted_at IS NULL";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $user['id']);
         break;
     case 'ADEAM':
-        $sql = "SELECT * FROM RESERVATION WHERE status = 'PENDING_ADEAM'";
+        $sql = "SELECT r.*, u.username as club_name 
+                FROM RESERVATION r 
+                JOIN USER u ON r.club_id = u.id 
+                WHERE r.status = 'PENDING_ADEAM' AND r.deleted_at IS NULL";
         $stmt = $conn->prepare($sql);
         break;
     case 'ADMIN':
-        $sql = "SELECT * FROM RESERVATION WHERE status = 'PENDING_ADMIN'";
+        $sql = "SELECT r.*, u.username as club_name 
+                FROM RESERVATION r 
+                JOIN USER u ON r.club_id = u.id 
+                WHERE r.status = 'PENDING_ADMIN' AND r.deleted_at IS NULL";
         $stmt = $conn->prepare($sql);
         break;
 }
 
 $stmt->execute();
-$result = $stmt->get_result();
-$reservations = $result->fetch_all(MYSQLI_ASSOC);
+$reservations = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 echo json_encode($reservations);
 $conn->close();
