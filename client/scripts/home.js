@@ -1,16 +1,16 @@
 // scripts/home.js
 const STATUS = {
-    PENDING_ADEAM: 'pending_adeam',
-    PENDING_ADMIN: 'pending_admin',
-    APPROVED: 'approved',
-    REJECTED: 'rejected'
+    PENDING_ADEAM: 'PENDING_ADEAM',
+    PENDING_ADMIN: 'PENDING_ADMIN',
+    APPROVED: 'APPROVED',
+    REJECTED: 'REJECTED'
 };
   
 const STATUS_LABELS = {
-    [STATUS.PENDING_ADEAM]: 'En attente ADEAM',
-    [STATUS.PENDING_ADMIN]: 'En attente Admin',
-    [STATUS.APPROVED]: 'Approuvé',
-    [STATUS.REJECTED]: 'Rejeté'
+    'PENDING_ADEAM': 'En attente de l\'ADEAM',
+    'PENDING_ADMIN': 'En attente de l\'ADMIN',
+    'APPROVED': 'Approuvé',
+    'REJECTED': 'Rejeté'
 };
   
 const STATUS_CLASSES = {
@@ -146,13 +146,20 @@ function displayReservations(reservations) {
                     <p><strong>Participants internes:</strong> ${reservation.internal_attendees}</p>
                     <p><strong>Participants externes:</strong> ${reservation.external_attendees}</p>
                     <p><strong>Équipements requis:</strong> Tables: ${equipment.tables}, Chaises: ${equipment.chaises}, Sonorisation: ${equipment.sonorisation}, Vidéoprojecteurs: ${equipment.videoprojecteurs}, Autres: ${equipment.autres}</p>
-                    <p><strong>Status:</strong> <span class="status ${reservation.status.toLowerCase()}">${reservation.status}</span></p>
+                    <p><strong>Status:</strong> <span class="status ${reservation.status.toLowerCase()}">${STATUS_LABELS[reservation.status]}</span></p>
+                    ${reservation.status === 'REJECTED' ? `<p><strong>Raison du rejet:</strong> ${reservation.rejection_reason}</p>` : ''}
                 </div>
-                ${currentUser.role === 'CLUB' && reservation.status !== 'REJECTED' ? `
+                ${currentUser.role === 'CLUB' ? `
                     <div class="reservation-actions">
-                        <button onclick="cancelReservation(this)" class="action-button cancel-button">
-                            Annuler
-                        </button>
+                        ${reservation.status === 'REJECTED' ? `
+                            <button onclick="deleteRejectedReservation(this)" class="action-button danger-btn">
+                                Supprimer
+                            </button>
+                        ` : reservation.status !== 'APPROVED' ? `
+                            <button onclick="cancelReservation(this)" class="action-button cancel-button">
+                                Annuler
+                            </button>
+                        ` : ''}
                     </div>
                 ` : currentUser.role !== 'CLUB' ? `
                     <div class="reservation-actions">
@@ -167,6 +174,35 @@ function displayReservations(reservations) {
             </div>
         `;
     }).join('');
+}
+
+// Add this new function
+function deleteRejectedReservation(button) {
+    const reservationItem = button.closest('.reservation-item');
+    const reservationId = reservationItem.dataset.id;
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+    if (confirm('Voulez-vous supprimer définitivement cette réservation rejetée?')) {
+        fetch('http://localhost/ReservENSAM/server/api/cancel_reservation.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ 
+                id: reservationId,
+                user_id: currentUser.user_id
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                reservationItem.remove();
+            } else {
+                alert('Failed to delete reservation');
+            }
+        });
+    }
 }
 
 function submitReservation() {
