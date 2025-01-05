@@ -1,28 +1,36 @@
+document.addEventListener('DOMContentLoaded', async () => {
+    // Retrieve current user
+    const currentUser = await checkAuth();
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Get reservations from localStorage
-    const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-    
+    // Fetch approved reservations from the backend
+    const response = await fetch('http://localhost/ReservENSAM/server/api/get_reservations.php', {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+    const reservations = await response.json();
+
+    // Filter approved reservations
+    const approvedReservations = reservations.filter(reservation => reservation.status === 'APPROVED');
+
     // Convert reservations to calendar events
-    const events = reservations.map(reservation => {
-        // Combine date with time
-        const startDateTime = `${reservation.date}T${reservation.startTime}`;
-        const endDateTime = `${reservation.date}T${reservation.endTime}`;
+    const events = approvedReservations.map(reservation => {
+        const startDateTime = `${reservation.start_date}`;
+        const endDateTime = `${reservation.end_date}`;
         
         return {
             id: reservation.id,
-            title: reservation.objet,
+            title: `${reservation.club_name} - ${reservation.room_name}`,
             start: startDateTime,
             end: endDateTime,
-            className: `status-${reservation.status}`,
+            className: `status-${reservation.status.toLowerCase()}`,
             extendedProps: {
-                type: reservation.type,
-                room: reservation.room,
-                status: reservation.status,
-                user: reservation.userName,
-                participantsInternes: reservation.participantsInternes,
-                participantsExternes: reservation.participantsExternes,
-                equipment: reservation.equipment
+                objet: reservation.activity_description,
+                type: reservation.event_type,
+                room: reservation.room_name,
+                participantsInternes: reservation.internal_attendees,
+                participantsExternes: reservation.external_attendees,
+                equipment: JSON.parse(reservation.required_equipment)
             }
         };
     });
@@ -55,14 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             tooltip.innerHTML = `
                 <strong>${event.title}</strong><br>
+                Objet de l'événement: ${event.extendedProps.objet}<br>
                 Type: ${event.extendedProps.type}<br>
-                Room: ${event.extendedProps.room}<br>
-                Status: ${event.extendedProps.status}<br>
-                Reserved by: ${event.extendedProps.user}<br>
-                Internal Participants: ${event.extendedProps.participantsInternes}<br>
-                External Participants: ${event.extendedProps.participantsExternes}<br>
-                Time: ${event.start.toLocaleTimeString()} - ${event.end.toLocaleTimeString()}<br>
-                ${equipmentHtml ? `<br>Equipment:<br>${equipmentHtml}` : ''}
+                Participants internes: ${event.extendedProps.participantsInternes}<br>
+                Participants externes: ${event.extendedProps.participantsExternes}<br>
+                ${equipmentHtml ? `<br>Équipements:<br>${equipmentHtml}` : ''}
             `;
             
             tooltip.style.display = 'block';
@@ -81,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="fc-event-title-container">
                             <div class="fc-event-title">${info.event.title}</div>
                             <div class="fc-event-time">
-                                ${info.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                ${info.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${info.event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                             </div>
                         </div>
                     </div>
@@ -91,40 +96,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     calendar.render();
-
-    // Update calendar when localStorage changes
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'reservations') {
-            const updatedReservations = JSON.parse(e.newValue || '[]');
-            calendar.removeAllEvents();
-            calendar.addEventSource(updatedReservations.map(reservation => ({
-                // ... same event mapping as above
-            })));
-        }
-    });
 });
-
-const loginUser = async (username, password) => {
-    try {
-        const response = await fetch("http://localhost/ReservENSAM/server/api/login.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username, password }),
-        });
-    
-        const data = await response.json();
-    
-        if (response.ok) {
-            console.log("Login successful:", data);
-        } else {
-            console.error("Login failed:", data);
-        }
-    } catch (error) {
-        console.error("Error:", error);
-    }
-};
-
-// Example usage
-loginUser("exampleUsername", "examplePassword");
