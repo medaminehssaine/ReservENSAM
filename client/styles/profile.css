@@ -1,0 +1,50 @@
+.profile-container {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 2rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.profile-title-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-container h2 {
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  font-family: 'Quantify', sans-serif;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid rgb(221, 221, 221);
+  border-radius: 4px;
+}
+
+.update-button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--bg-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.update-button:hover {
+  opacity: 0.9;
+}
