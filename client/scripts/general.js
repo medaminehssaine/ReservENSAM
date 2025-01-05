@@ -65,3 +65,70 @@ function showToast(message, type = 'success') {
 window.alert = function(message) {
     showToast(message);
 };
+
+// Add modal system
+function showModal({ title, message, inputType = 'text', confirmText = 'Confirmer', cancelText = 'Annuler', onConfirm, placeholder = '' }) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+
+    const content = `
+        <div class="modal-header">
+            <h3 class="modal-title">${title}</h3>
+        </div>
+        <div class="modal-body">
+            ${inputType === 'text' ? 
+                `<textarea placeholder="${placeholder}" class="modal-input"></textarea>` :
+                `<p>${message}</p>`
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="modal-button modal-cancel">${cancelText}</button>
+            <button class="modal-button modal-confirm">${confirmText}</button>
+        </div>
+    `;
+
+    modal.innerHTML = content;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    return new Promise((resolve) => {
+        modal.querySelector('.modal-confirm').addEventListener('click', () => {
+            const input = modal.querySelector('.modal-input');
+            const value = input ? input.value : true;
+            overlay.remove();
+            resolve(value);
+        });
+
+        modal.querySelector('.modal-cancel').addEventListener('click', () => {
+            overlay.remove();
+            resolve(null);
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.remove();
+                resolve(null);
+            }
+        });
+    });
+}
+
+// Replace window.confirm and window.prompt
+window.confirm = function(message) {
+    return showModal({
+        title: 'Confirmation',
+        message: message,
+        inputType: 'message'
+    });
+};
+
+window.prompt = function(message, defaultValue = '') {
+    return showModal({
+        title: message,
+        inputType: 'text',
+        placeholder: defaultValue
+    });
+};

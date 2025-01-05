@@ -78,12 +78,19 @@ function approveReservation(button) {
     });
 }
 
-function rejectReservation(button) {
+// Update rejectReservation function
+async function rejectReservation(button) {
     const reservationItem = button.closest('.reservation-item');
     const reservationId = reservationItem.dataset.id;
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-    const reason = prompt('Raison du rejet:');
+    const reason = await showModal({
+        title: 'Raison du rejet',
+        placeholder: 'Veuillez expliquer la raison du rejet...',
+        confirmText: 'Rejeter',
+        cancelText: 'Annuler'
+    });
+
     if (!reason) return;
 
     fetch('http://localhost/ReservENSAM/server/api/reject_reservation.php', {
@@ -433,8 +440,18 @@ function cancelReservation(button) {
     });
 }
 
-// Add this new function for canceling approved reservations
-function cancelApprovedReservation(button) {
+// Update cancelApprovedReservation function
+async function cancelApprovedReservation(button) {
+    const confirmed = await showModal({
+        title: 'Annuler la réservation',
+        message: 'Êtes-vous sûr de vouloir annuler cette réservation approuvée ?',
+        inputType: 'message',
+        confirmText: 'Oui, annuler',
+        cancelText: 'Non, garder'
+    });
+
+    if (!confirmed) return;
+
     const reservationItem = button.closest('.reservation-item');
     const reservationId = reservationItem.dataset.id;
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
