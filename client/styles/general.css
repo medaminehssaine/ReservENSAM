@@ -1,14 +1,42 @@
 /* styles/general.css */
 :root {
+  /* Colors */
   --bg-primary: #d3565c;
-  --bg-secondary: rgb(255, 245, 247);
+  --bg-secondary: #fff5f7;
   --bg-tertiary: #ffffff;
-  --text-primary: rgb(178, 71, 96);
+  --text-primary: #b24760;
   --text-secondary: #ffffff;
-  --text-tertiary: #000;
+  --text-tertiary: #333333;
   --accent: #3889a5;
   --accent-hover: #24596b;
   --danger: #ef4444;
+  --success: #16a34a;
+  --warning: #ca8a04;
+  
+  /* Font sizes */
+  --font-xs: 0.75rem;    /* 12px */
+  --font-sm: 0.875rem;   /* 14px */
+  --font-base: 1rem;     /* 16px */
+  --font-lg: 1.125rem;   /* 18px */
+  --font-xl: 1.25rem;    /* 20px */
+  --font-2xl: 1.5rem;    /* 24px */
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;  /* 4px */
+  --spacing-sm: 0.5rem;   /* 8px */
+  --spacing-md: 1rem;     /* 16px */
+  --spacing-lg: 1.5rem;   /* 24px */
+  --spacing-xl: 2rem;     /* 32px */
+  
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  
+  /* Breakpoints */
+  --mobile: 480px;
+  --tablet: 768px;
+  --desktop: 1024px;
 }
 
 * {
@@ -75,9 +103,10 @@ nav h1 {
 }
 
 .container {
+  width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: var(--spacing-md);
 }
 
 .form-group {
@@ -123,15 +152,18 @@ button:hover {
 }
 
 .action-button {
-  padding: 10px 20px;
+  padding: var(--spacing-sm) var(--spacing-md);
   margin: 5px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: bold;
   transition: opacity 0.2s;
   width: auto;
   transition: transform 0.2s;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .action-button:hover {
@@ -215,6 +247,82 @@ button:hover {
   75% { transform: translateX(10px); }
 }
 
+/* Toast/Alert System */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.toast {
+  min-width: 300px;
+  margin-bottom: 10px;
+  padding: 15px 20px;
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideIn 0.3s ease-out;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.toast-success {
+  border-left: 4px solid var(--success);
+}
+
+.toast-error {
+  border-left: 4px solid var(--danger);
+}
+
+.toast-warning {
+  border-left: 4px solid var(--warning);
+}
+
+.toast-message {
+  color: var(--text-tertiary);
+  font-size: var(--font-sm);
+  margin-right: 10px;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-close:hover {
+  color: var(--text-tertiary);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .action-button {
@@ -236,4 +344,65 @@ button:hover {
 .download-button:hover {
   background-color: #1d4ed8;
   transform: scale(1.05);
+}
+
+/* Add responsive containers */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 100%;
+    padding: var(--spacing-sm);
+  }
+}
+
+/* Add responsive navigation */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+
+  .nav-center {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .nav-right {
+    width: 100%;
+  }
+
+  .logout-btn {
+    width: 100%;
+  }
+}
+
+/* Add responsive form elements */
+@media (max-width: 480px) {
+  input, select, textarea {
+    font-size: 16px; /* Prevents zoom on mobile */
+  }
+
+  .form-group-inline {
+    flex-direction: column;
+  }
+
+  .form-group-inline .form-group {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .toast-container {
+    top: auto;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+  }
+  
+  .toast {
+    min-width: 0;
+    width: 100%;
+  }
 }

@@ -32,3 +32,36 @@ async function checkAuth() {
 
     return currentUser;
 }
+
+// Add this toast notification system
+function showToast(message, type = 'success') {
+    // Create container if it doesn't exist
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    // Create toast
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <span class="toast-message">${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+    `;
+
+    // Add to container
+    container.appendChild(toast);
+
+    // Remove after 5 seconds
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease-out forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+// Replace all alerts with this new function
+window.alert = function(message) {
+    showToast(message);
+};

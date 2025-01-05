@@ -40,3 +40,48 @@ input:focus{
   margin-bottom: 5px;
   border-color: var(--bg-primary);
 }
+
+/* Toast position adjustment for login page */
+.toast-container {
+    top: auto !important;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.toast {
+    background: var(--bg-tertiary);
+    min-width: 320px;
+    margin-bottom: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-lg);
+}
+
+.toast-error {
+    border-left: 4px solid var(--danger);
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        width: 90%;
+        padding: var(--spacing-md);
+        margin: 1rem auto;
+    }
+
+    .login-title {
+        font-size: var(--font-xl);
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .login-button {
+        margin-top: var(--spacing-md);
+    }
+
+    .toast {
+        min-width: calc(100vw - 40px);
+        margin: 0 20px;
+    }
+}

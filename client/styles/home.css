@@ -4,10 +4,9 @@
 
 #clubDashboard {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  padding: 2rem;
-  max-width: 90rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 600px), 1fr));
+  gap: var(--spacing-xl);
+  padding: var(--spacing-xl);
   margin: 0 auto;
   justify-content: space-around;
 }
@@ -31,8 +30,9 @@ textarea {
 
 .make-reservation, .view-reservations {
   background: var(--bg-secondary);
-  padding: 2rem;
-  border-radius: 8px;
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .dashboard-title {
@@ -58,7 +58,7 @@ textarea {
 }
 
 .reservations-scroll {
-  max-height: 750px;
+  max-height: 80vh;
   overflow-y: auto;
   padding-right: 1rem;
 }

@@ -135,6 +135,17 @@ function displayReservations(reservations) {
     container.innerHTML = filteredReservations.map(reservation => {
         const equipment = JSON.parse(reservation.required_equipment);
         let downloadButton = '';
+        let cancelButton = '';
+
+        if (currentUser.role === 'CLUB') {
+            // Add cancel button for all club reservations
+            cancelButton = `
+                <button onclick="cancelReservation(this)" class="action-button cancel-button">
+                    Annuler
+                </button>
+            `;
+        }
+
         if (reservation.status === 'APPROVED') {
             downloadButton = `
                 <button onclick="downloadPdf(${reservation.id})" class="action-button download-button">
@@ -160,17 +171,13 @@ function displayReservations(reservations) {
                 </div>
                 <div class="reservation-actions">
                     ${downloadButton}
-                    ${currentUser.role === 'CLUB' ? `
-                        ${reservation.status === 'REJECTED' ? `
+                    ${currentUser.role === 'CLUB' ? 
+                        reservation.status === 'REJECTED' ? `
                             <button onclick="deleteRejectedReservation(this)" class="action-button danger-btn">
                                 Supprimer
                             </button>
-                        ` : reservation.status !== 'APPROVED' ? `
-                            <button onclick="cancelReservation(this)" class="action-button cancel-button">
-                                Annuler
-                            </button>
-                        ` : ''}
-                    ` : currentUser.role !== 'CLUB' ? `
+                        ` : cancelButton
+                    : currentUser.role !== 'CLUB' ? `
                         <button onclick="approveReservation(this)" class="action-button accept-button">
                             Approuver
                         </button>
@@ -186,72 +193,135 @@ function displayReservations(reservations) {
 
 async function downloadPdf(reservationId) {
     try {
-        // Get reservation data
-        const response = await fetch('http://localhost/ReservENSAM/server/api/get_reservations.php', {
+        const response = await fetch(`http://localhost/ReservENSAM/server/api/get_reservation.php?id=${reservationId}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
         
-        const reservations = await response.json();
-        const reservation = reservations.find(r => r.id === reservationId);
-
-        if (!reservation) {
-            throw new Error('Reservation not found');
+        const data = await response.json();
+        if (!data.success || !data.reservation) {
+            throw new Error('Failed to fetch reservation data');
         }
 
-        // Create PDF
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        // Set font
-        doc.setFont("helvetica");
-
-        // Add title
-        doc.setFontSize(20);
-        doc.text('Confirmation de Réservation - ENSAM', 105, 20, { align: 'center' });
-        
-        // Add content
-        doc.setFontSize(12);
-        let y = 40;
+        const reservation = data.reservation;
         const equipment = JSON.parse(reservation.required_equipment);
-
-        // Add reservation details
-        const details = [
-            { label: 'Club:', value: reservation.club_name },
-            { label: 'Date:', value: reservation.start_date.split(' ')[0] },
-            { label: 'Horaire:', value: `${reservation.start_time.slice(0, 5)} à ${reservation.end_time.slice(0, 5)}` },
-            { label: 'Salle:', value: reservation.room_name },
-            { label: "Type d'événement:", value: reservation.event_type },
-            { label: "Description:", value: reservation.activity_description },
-            { label: 'Participants:', value: `${reservation.internal_attendees} internes, ${reservation.external_attendees} externes` },
-            { label: 'Équipements:', value: '' }
-        ];
-
-        details.forEach(detail => {
-            doc.text(`${detail.label} ${detail.value}`, 20, y);
-            y += 10;
+        
+        // Format date
+        const date = new Date(reservation.start_date);
+        const formattedDate = date.toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
 
-        // Add equipment details
-        y += 5;
-        Object.entries(equipment).forEach(([key, value]) => {
-            if (value) {
-                doc.text(`- ${key}: ${value}`, 30, y);
-                y += 10;
+        const docDefinition = {
+            pageSize: 'A4',
+            pageMargins: [40, 60, 40, 60],
+            header: {
+                text: 'ÉCOLE NATIONALE SUPÉRIEURE DES ARTS ET MÉTIERS',
+                alignment: 'center',
+                margin: [0, 20],
+                fontSize: 14,
+                bold: true
+            },
+            content: [
+                {
+                    text: 'CONFIRMATION DE RÉSERVATION',
+                    style: 'header',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 20]
+                },
+                {
+                    canvas: [
+                        {
+                            type: 'line',
+                            x1: 0,
+                            y1: 5,
+                            x2: 515,
+                            y2: 5,
+                            lineWidth: 1,
+                            lineColor: '#d3565c'
+                        }
+                    ],
+                    margin: [0, 0, 0, 20]
+                },
+                {
+                    style: 'tableExample',
+                    table: {
+                        widths: ['35%', '65%'],
+                        body: [
+                            ['Club', { text: reservation.club_name, bold: true }],
+                            ['Type d\'événement', reservation.event_type],
+                            ['Description', { text: reservation.activity_description, italics: true }],
+                            ['Date', formattedDate],
+                            ['Horaire', `${reservation.start_time.slice(0, 5)} à ${reservation.end_time.slice(0, 5)}`],
+                            ['Salle', reservation.room_name],
+                            ['Participants', `Internes: ${reservation.internal_attendees}\nExternes: ${reservation.external_attendees}`],
+                            [
+                                'Équipements',
+                                {
+                                    ul: [
+                                        `${equipment.tables} tables`,
+                                        `${equipment.chaises} chaises`,
+                                        `${equipment.sonorisation} sonorisation`,
+                                        `${equipment.videoprojecteurs} vidéoprojecteurs`,
+                                        equipment.autres ? `Autres: ${equipment.autres}` : ''
+                                    ].filter(item => item)
+                                }
+                            ]
+                        ]
+                    }
+                },
+                {
+                    text: `Statut: ${STATUS_LABELS[reservation.status]}`,
+                    bold: true,
+                    color: reservation.status === 'APPROVED' ? '#16a34a' : '#666666',
+                    margin: [0, 20, 0, 20]
+                },
+                {
+                    text: [
+                        'Document généré le ',
+                        new Date().toLocaleDateString('fr-FR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })
+                    ],
+                    style: 'footer',
+                    alignment: 'center'
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 18,
+                    bold: true,
+                    color: '#d3565c'
+                },
+                tableExample: {
+                    margin: [0, 5, 0, 15]
+                },
+                footer: {
+                    fontSize: 10,
+                    italic: true,
+                    color: '#666666'
+                }
+            },
+            defaultStyle: {
+                fontSize: 11,
+                lineHeight: 1.2
             }
-        });
+        };
 
-        // Add footer
-        doc.setFontSize(10);
-        doc.text('Document généré automatiquement', 105, 280, { align: 'center' });
-
-        // Save PDF
-        doc.save(`reservation-${reservationId}.pdf`);
+        // Generate and download PDF
+        pdfMake.createPdf(docDefinition).download(`reservation_${formattedDate}.pdf`);
 
     } catch (error) {
-        console.error('PDF Generation Error:', error);
-        alert('Erreur lors de la génération du PDF');
+        console.error('Error details:', error);
+        showToast('Erreur lors de la génération du PDF: ' + error.message, 'error');
     }
 }
 
@@ -278,7 +348,7 @@ function deleteRejectedReservation(button) {
             if (data.success) {
                 reservationItem.remove();
             } else {
-                alert('Failed to delete reservation');
+                showToast('Failed to delete reservation', 'error');
             }
         });
     }
@@ -295,7 +365,7 @@ function submitReservation() {
     const eventType = document.getElementById('type').value; // Add this line
 
     if (!activityDescription || !internalAttendees || !externalAttendees || selectedDates.length === 0 || !startTime || !endTime || !room) {
-        alert('Veuillez remplir tous les champs obligatoires.');
+        showToast('Veuillez remplir tous les champs obligatoires.', 'error');
         return;
     }
 
@@ -361,4 +431,35 @@ function cancelReservation(button) {
             alert('Failed to cancel reservation');
         }
     });
+}
+
+// Add this new function for canceling approved reservations
+function cancelApprovedReservation(button) {
+    const reservationItem = button.closest('.reservation-item');
+    const reservationId = reservationItem.dataset.id;
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+    if (confirm('Êtes-vous sûr de vouloir annuler cette réservation approuvée?')) {
+        fetch('http://localhost/ReservENSAM/server/api/cancel_reservation.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ 
+                id: reservationId,
+                user_id: currentUser.user_id,
+                is_approved: true
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Réservation annulée avec succès', 'success');
+                loadReservations();
+            } else {
+                showToast('Échec de l\'annulation de la réservation', 'error');
+            }
+        });
+    }
 }
