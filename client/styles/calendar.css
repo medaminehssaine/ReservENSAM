@@ -1,0 +1,48 @@
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#calendar-container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 20px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    background-color: var(--bg-tertiary);
+}
+
+.fc-event {
+    cursor: pointer;
+}
+
+/* Status-based colors */
+.status-pending_adeam { 
+    background-color: var(--status-pending); 
+    border-color: var(--status-pending); 
+}
+.status-approved { 
+    background-color: var(--status-approved); 
+    border-color: var(--status-approved); 
+}
+.status-rejected { 
+    background-color: var(--status-rejected); 
+    border-color: var(--status-rejected); 
+}
+
+.event-tooltip {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: none;
+}
+
+.fc-button-group {
+    margin-bottom: 5px;
+}

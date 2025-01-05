@@ -52,6 +52,28 @@ nav h1 {
   font-size: 0.9rem;
 }
 
+.nav-center {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.nav-link {
+  font-family: 'Quantify', sans-serif;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: 2px;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-link:hover {
+  border-bottom: 2px solid var(--text-primary);
+}
+
 .container {
   max-width: 1400px;
   margin: 0 auto;
