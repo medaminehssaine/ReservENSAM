@@ -134,6 +134,15 @@ function displayReservations(reservations) {
 
     container.innerHTML = filteredReservations.map(reservation => {
         const equipment = JSON.parse(reservation.required_equipment);
+        let downloadButton = '';
+        if (reservation.status === 'APPROVED') {
+            downloadButton = `
+                <button onclick="downloadPdf(${reservation.id})" class="action-button download-button">
+                    Télécharger PDF
+                </button>
+            `;
+        }
+
         return `
             <div class="reservation-item" data-id="${reservation.id}">
                 <div class="reservation-details">
@@ -149,8 +158,9 @@ function displayReservations(reservations) {
                     <p><strong>Status:</strong> <span class="status ${reservation.status.toLowerCase()}">${STATUS_LABELS[reservation.status]}</span></p>
                     ${reservation.status === 'REJECTED' ? `<p><strong>Raison du rejet:</strong> ${reservation.rejection_reason}</p>` : ''}
                 </div>
-                ${currentUser.role === 'CLUB' ? `
-                    <div class="reservation-actions">
+                <div class="reservation-actions">
+                    ${downloadButton}
+                    ${currentUser.role === 'CLUB' ? `
                         ${reservation.status === 'REJECTED' ? `
                             <button onclick="deleteRejectedReservation(this)" class="action-button danger-btn">
                                 Supprimer
@@ -160,20 +170,89 @@ function displayReservations(reservations) {
                                 Annuler
                             </button>
                         ` : ''}
-                    </div>
-                ` : currentUser.role !== 'CLUB' ? `
-                    <div class="reservation-actions">
+                    ` : currentUser.role !== 'CLUB' ? `
                         <button onclick="approveReservation(this)" class="action-button accept-button">
                             Approuver
                         </button>
                         <button onclick="rejectReservation(this)" class="action-button reject-button">
                             Rejeter
                         </button>
-                    </div>
-                ` : ''}
+                    ` : ''}
+                </div>
             </div>
         `;
     }).join('');
+}
+
+async function downloadPdf(reservationId) {
+    try {
+        // Get reservation data
+        const response = await fetch('http://localhost/ReservENSAM/server/api/get_reservations.php', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        const reservations = await response.json();
+        const reservation = reservations.find(r => r.id === reservationId);
+
+        if (!reservation) {
+            throw new Error('Reservation not found');
+        }
+
+        // Create PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Set font
+        doc.setFont("helvetica");
+
+        // Add title
+        doc.setFontSize(20);
+        doc.text('Confirmation de Réservation - ENSAM', 105, 20, { align: 'center' });
+        
+        // Add content
+        doc.setFontSize(12);
+        let y = 40;
+        const equipment = JSON.parse(reservation.required_equipment);
+
+        // Add reservation details
+        const details = [
+            { label: 'Club:', value: reservation.club_name },
+            { label: 'Date:', value: reservation.start_date.split(' ')[0] },
+            { label: 'Horaire:', value: `${reservation.start_time.slice(0, 5)} à ${reservation.end_time.slice(0, 5)}` },
+            { label: 'Salle:', value: reservation.room_name },
+            { label: "Type d'événement:", value: reservation.event_type },
+            { label: "Description:", value: reservation.activity_description },
+            { label: 'Participants:', value: `${reservation.internal_attendees} internes, ${reservation.external_attendees} externes` },
+            { label: 'Équipements:', value: '' }
+        ];
+
+        details.forEach(detail => {
+            doc.text(`${detail.label} ${detail.value}`, 20, y);
+            y += 10;
+        });
+
+        // Add equipment details
+        y += 5;
+        Object.entries(equipment).forEach(([key, value]) => {
+            if (value) {
+                doc.text(`- ${key}: ${value}`, 30, y);
+                y += 10;
+            }
+        });
+
+        // Add footer
+        doc.setFontSize(10);
+        doc.text('Document généré automatiquement', 105, 280, { align: 'center' });
+
+        // Save PDF
+        doc.save(`reservation-${reservationId}.pdf`);
+
+    } catch (error) {
+        console.error('PDF Generation Error:', error);
+        alert('Erreur lors de la génération du PDF');
+    }
 }
 
 // Add this new function

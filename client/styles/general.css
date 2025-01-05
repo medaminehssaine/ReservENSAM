@@ -221,3 +221,19 @@ button:hover {
     width: 100%;
   }
 }
+
+.download-button {
+  background-color: #2563eb;
+  color: white;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.download-button:hover {
+  background-color: #1d4ed8;
+  transform: scale(1.05);
+}
